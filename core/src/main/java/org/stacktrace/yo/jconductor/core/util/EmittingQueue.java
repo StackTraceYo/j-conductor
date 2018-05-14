@@ -5,20 +5,20 @@ import java.util.function.Consumer;
 
 public class EmittingQueue<T> extends PriorityQueue<T> {
 
-    private final Consumer<? super Event> onQueued;
-    private final Consumer<? super Event> onDeque;
+    private final Consumer<Event> onQueued;
+    private final Consumer<Event> onDeque;
 
     public EmittingQueue(QueueEventListener listener) {
         this.onQueued = listener.onQueued();
         this.onDeque = listener.onDeque();
     }
 
-    public EmittingQueue(Consumer<? super Event> onQueued) {
+    public EmittingQueue(Consumer<Event> onQueued) {
         this.onQueued = onQueued;
         this.onDeque = null;
     }
 
-    public EmittingQueue(Consumer<? super Event> onQueued, Consumer<? super Event> onDeque) {
+    public EmittingQueue(Consumer<Event> onQueued, Consumer<Event> onDeque) {
         this.onQueued = onQueued;
         this.onDeque = onDeque;
     }
@@ -63,9 +63,9 @@ public class EmittingQueue<T> extends PriorityQueue<T> {
     }
 
     public interface QueueEventListener {
-        Consumer<? super Event> onQueued();
+        Consumer<Event> onQueued();
 
-        Consumer<? super Event> onDeque();
+        Consumer<Event> onDeque();
     }
 
     public static class Event {
