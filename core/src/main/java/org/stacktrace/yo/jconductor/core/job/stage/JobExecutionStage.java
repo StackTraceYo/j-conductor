@@ -2,7 +2,6 @@ package org.stacktrace.yo.jconductor.core.job.stage;
 
 public enum JobExecutionStage {
     INITIALZING,
-    STARTED,
     RUNNING,
     COMPLETE,
     ERRORED;

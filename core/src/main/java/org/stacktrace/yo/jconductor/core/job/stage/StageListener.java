@@ -4,9 +4,13 @@ import java.util.function.Consumer;
 
 public interface StageListener<V> {
 
-    Consumer<? super JobStage<V>> onComplete();
+    Consumer<JobStage<V>> onInit();
+
+    Consumer<JobStage<V>> onStart();
+
+    Consumer<JobStage<V>> onComplete();
 
     //TODO error stage
-    Consumer<? super Throwable> onError();
+    Consumer<Throwable> onError();
 
 }

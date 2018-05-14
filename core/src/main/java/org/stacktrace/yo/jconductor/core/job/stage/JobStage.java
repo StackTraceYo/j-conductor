@@ -1,7 +1,5 @@
 package org.stacktrace.yo.jconductor.core.job.stage;
 
-import java.util.Optional;
-
 public class JobStage<V> {
 
     private final JobExecutionStage stage;
@@ -24,8 +22,12 @@ public class JobStage<V> {
         return stage;
     }
 
-    public Optional<V> getStageResult() {
-        return Optional.ofNullable(stageResult);
+    public V getStageResult() {
+        return stageResult;
+    }
+
+    public String getId() {
+        return id;
     }
 
     @Override

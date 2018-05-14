@@ -1,21 +1,10 @@
 package org.stacktrace.yo.jconductor.core.job;
 
-public interface Job<T, V> {
+import java.util.concurrent.Executor;
 
+public interface Job<V> {
 
-    V execute(T params);
+    V run();
 
-    default void cleanup() {
-        // no op
-    }
-
-    default void init() {
-        // no op
-    }
-
-    default void init(T params) {
-        // no op
-    }
-
-
+    V run(Executor e);
 }
