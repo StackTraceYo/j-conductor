@@ -3,18 +3,33 @@ package org.stacktrace.yo.jconductor.reactive.job;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.schedulers.Schedulers;
+import org.stacktrace.yo.jconductor.core.job.Executable;
 import org.stacktrace.yo.jconductor.core.job.Job;
-import org.stacktrace.yo.jconductor.core.job.Work;
 import org.stacktrace.yo.jconductor.core.job.Worker;
 import org.stacktrace.yo.jconductor.core.job.stage.JobExecutionStage;
 import org.stacktrace.yo.jconductor.core.job.stage.JobStage;
+import org.stacktrace.yo.jconductor.core.work.PostRun;
+import org.stacktrace.yo.jconductor.core.work.PreStart;
+import org.stacktrace.yo.jconductor.core.work.Work;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
 
-public class ObservableJob<T, V> extends Worker<T, V> implements Job<Observable<JobStage>> {
+public class ObservableJob<T, V> extends Worker<T, V> implements Executable<Observable<JobStage>> {
 
+
+    public ObservableJob(String id, Job<T, V> job, T params) {
+        super(id, job, params);
+    }
+
+    public ObservableJob(String id, PreStart<T> pre, Work<T, V> work, T params) {
+        super(id, pre, work, params);
+    }
+
+    public ObservableJob(String id, PreStart<T> pre, Work<T, V> work, PostRun post, T params) {
+        super(id, pre, work, post, params);
+    }
 
     public ObservableJob(String id, Work<T, V> work, T params) {
         super(id, work, params);
@@ -33,8 +48,7 @@ public class ObservableJob<T, V> extends Worker<T, V> implements Job<Observable<
     private Observable<JobStage> createAsyncObservable() {
         return Observable.create(subscriber -> {
             subscriber.onNext(JobExecutionStage.INITIALZING.createStage(this.id));
-            this.work.init();
-            this.work.init(this.params);
+            this.job.init(this.params);
             subscriber.onNext(JobExecutionStage.RUNNING.createStage(this.id));
             System.out.println(Thread.currentThread().getName());
             this.supplyFuture()
@@ -45,8 +59,7 @@ public class ObservableJob<T, V> extends Worker<T, V> implements Job<Observable<
     private Observable<JobStage> createAsyncObservable(Executor e) {
         return Observable.create(subscriber -> {
             subscriber.onNext(JobExecutionStage.INITIALZING.createStage(this.id));
-            this.work.init();
-            this.work.init(this.params);
+            this.job.init(this.params);
             subscriber.onNext(JobExecutionStage.RUNNING.createStage(this.id));
             System.out.println(Thread.currentThread().getName());
             this.supplyFuture(e)
@@ -61,7 +74,7 @@ public class ObservableJob<T, V> extends Worker<T, V> implements Job<Observable<
                 subscriber.onError(throwable);
                 subscriber.onNext(JobExecutionStage.ERRORED.createStage(this.id, throwable));
             } else {
-                this.work.cleanup();
+                this.job.postRun();
                 subscriber.onNext(JobExecutionStage.COMPLETE.createStage(this.id, result));
                 subscriber.onComplete();
             }
@@ -69,11 +82,11 @@ public class ObservableJob<T, V> extends Worker<T, V> implements Job<Observable<
     }
 
     private CompletableFuture<V> supplyFuture() {
-        return CompletableFuture.supplyAsync(() -> this.work.doWork(this.params));
+        return CompletableFuture.supplyAsync(() -> this.job.doWork(this.params));
     }
 
     private CompletableFuture<V> supplyFuture(Executor e) {
-        return CompletableFuture.supplyAsync(() -> this.work.doWork(this.params), e);
+        return CompletableFuture.supplyAsync(() -> this.job.doWork(this.params), e);
     }
 
     public static void main(String args[]) throws InterruptedException {

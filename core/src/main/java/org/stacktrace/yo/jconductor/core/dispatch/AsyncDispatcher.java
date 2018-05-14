@@ -1,9 +1,8 @@
 package org.stacktrace.yo.jconductor.core.dispatch;
 
 import org.stacktrace.yo.jconductor.core.job.AsynchronousJob;
-import org.stacktrace.yo.jconductor.core.job.Work;
+import org.stacktrace.yo.jconductor.core.job.Job;
 import org.stacktrace.yo.jconductor.core.job.stage.StageListener;
-import org.stacktrace.yo.jconductor.core.job.stage.StageListenerBuilder;
 import org.stacktrace.yo.jconductor.core.util.EmittingQueue;
 
 import java.util.UUID;
@@ -28,7 +27,7 @@ public class AsyncDispatcher implements Dispatcher {
         this.executor = Executors.newFixedThreadPool(config.getMaxConcurrent());
     }
 
-    public <T, V> String schedule(Work<T, V> job, T params) {
+    public <T, V> String schedule(Job<T, V> job, T params) {
         String id = UUID.randomUUID().toString();
         ScheduledWork<T, V> scheduledWork = new ScheduledWork<>(job, params, id);
         return jobQueue.offer(scheduledWork) ? id : "Unable To Queue";
@@ -36,24 +35,25 @@ public class AsyncDispatcher implements Dispatcher {
 
 
     @Override
-    public <T, V> String schedule(Work<T, V> job, T params, StageListener<V> listener) {
-        return null;
+    public <T, V> String schedule(Job<T, V> job, T params, StageListener<V> listener) {
+        String id = UUID.randomUUID().toString();
+        ScheduledWork<T, V> scheduledWork = new ScheduledWork<>(job, params, id, listener);
+        return jobQueue.offer(scheduledWork) ? id : "Unable To Queue";
     }
 
     @Override
     public void consume() {
-        ScheduledWork work;
-        if (this.jobQueue.peek() != null) {
-            work = this.jobQueue.poll();
+        ScheduledWork work = this.jobQueue.poll();
+        if (work != null) {
             AsynchronousJob createdJob = createAsyncJob(work);
             createdJob.run(executor);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private AsynchronousJob createAsyncJob(ScheduledWork work) {
-        return new AsynchronousJob<>(work.getId(), work.getWork(), work.getParams(),
-                new StageListenerBuilder()
+    private <V> AsynchronousJob createAsyncJob(ScheduledWork work) {
+        return new AsynchronousJob(work.getId(), work.getJob(), work.getParams(),
+                new StageListener.StageListenerBuilder<V>()
                         .onStart(running -> this.running.put(work.getId(), work))
                         .onComplete(
                                 completed -> {
@@ -61,7 +61,7 @@ public class AsyncDispatcher implements Dispatcher {
                                             new CompletedWork(
                                                     completed.getStageResult(),
                                                     work.getParams(),
-                                                    work.getWork().getClass().toGenericString(),
+                                                    work.getJob().getClass().toGenericString(),
                                                     completed.getId()
                                             )
                                     );
@@ -73,12 +73,13 @@ public class AsyncDispatcher implements Dispatcher {
                                             new CompletedWork(
                                                     error,
                                                     work.getParams(),
-                                                    work.getWork().getClass().toGenericString(),
+                                                    work.getJob().getClass().toGenericString(),
                                                     work.getId()
                                             )
                                     );
                                     this.running.remove(work.getId());
                                 })
+                        .bindListener(work.getListener())
                         .build()
         );
     }
