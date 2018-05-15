@@ -6,7 +6,7 @@ import org.stacktrace.yo.jconductor.core.execution.work.*;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 public class AsynchronousJob<T, V> extends Worker<T, V> implements Executable<CompletableFuture<V>> {
@@ -53,28 +53,32 @@ public class AsynchronousJob<T, V> extends Worker<T, V> implements Executable<Co
 
     public CompletableFuture<V> run() {
         return supplyFuture()
-                .whenComplete(finish());
+                .handle(finish());
     }
 
     public CompletableFuture<V> run(Executor e) {
         return supplyFuture(e)
-                .whenComplete(finish());
+                .handle(finish());
     }
 
-    private BiConsumer<V, Throwable> finish() {
+    private BiFunction<V, Throwable, V> finish() {
         return (v, throwable) -> {
+            V result = null;
             if (throwable != null) {
                 this.consumeError(throwable);
             } else {
                 this.result = v;
+                result = v;
                 this.consumeComplete();
             }
             this.job.postRun();
+            return result;
         };
     }
 
     private CompletableFuture<V> supplyFuture() {
         return CompletableFuture.supplyAsync(() -> {
+            job.init(params);
             this.consumeStart();
             return this.job.doWork(this.params);
         });
@@ -82,6 +86,7 @@ public class AsynchronousJob<T, V> extends Worker<T, V> implements Executable<Co
 
     private CompletableFuture<V> supplyFuture(Executor e) {
         return CompletableFuture.supplyAsync(() -> {
+            job.init(params);
             this.consumeStart();
             return this.job.doWork(this.params);
         }, e);
