@@ -1,4 +1,4 @@
-package org.stacktrace.yo.jconductor.core.job;
+package org.stacktrace.yo.jconductor.core.execution.job;
 
 import java.util.concurrent.Executor;
 

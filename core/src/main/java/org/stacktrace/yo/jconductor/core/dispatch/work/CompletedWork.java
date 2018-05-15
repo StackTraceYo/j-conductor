@@ -1,4 +1,4 @@
-package org.stacktrace.yo.jconductor.core.dispatch;
+package org.stacktrace.yo.jconductor.core.dispatch.work;
 
 import java.util.Optional;
 

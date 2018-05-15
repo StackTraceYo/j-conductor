@@ -1,30 +1,25 @@
-package org.stacktrace.yo.jconductor.core.dispatch;
+package org.stacktrace.yo.jconductor.core.dispatch.dispatcher;
 
-import org.stacktrace.yo.jconductor.core.job.AsynchronousJob;
-import org.stacktrace.yo.jconductor.core.job.Job;
-import org.stacktrace.yo.jconductor.core.job.stage.StageListener;
+import org.stacktrace.yo.jconductor.core.dispatch.work.CompletedWork;
+import org.stacktrace.yo.jconductor.core.dispatch.work.ScheduledWork;
+import org.stacktrace.yo.jconductor.core.execution.job.SynchronousJob;
+import org.stacktrace.yo.jconductor.core.execution.stage.StageListener;
+import org.stacktrace.yo.jconductor.core.execution.work.Job;
 import org.stacktrace.yo.jconductor.core.util.EmittingQueue;
 
+import java.util.HashMap;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-public class AsyncDispatcher implements Dispatcher {
+public class BlockingDispatcher implements Dispatcher {
 
     private final EmittingQueue<ScheduledWork> jobQueue;
-    private final ConcurrentHashMap<String, ScheduledWork> running;
-    private final ConcurrentHashMap<String, CompletedWork> completed;
-    private final DispatcherConfig config;
-    private final ExecutorService executor;
+    private final HashMap<String, CompletedWork> completed;
+    private ScheduledWork runningJob;
 
 
-    public AsyncDispatcher(DispatcherConfig config) {
+    public BlockingDispatcher() {
         this.jobQueue = createQueue();
-        this.config = config;
-        this.running = new ConcurrentHashMap<>();
-        this.completed = new ConcurrentHashMap<>();
-        this.executor = Executors.newFixedThreadPool(config.getMaxConcurrent());
+        this.completed = new HashMap<>();
     }
 
     public <T, V> String schedule(Job<T, V> job, T params) {
@@ -42,19 +37,21 @@ public class AsyncDispatcher implements Dispatcher {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void consume() {
         ScheduledWork work = this.jobQueue.poll();
         if (work != null) {
-            AsynchronousJob createdJob = createAsyncJob(work);
-            createdJob.run(executor);
+            SynchronousJob createdJob = createJob(work);
+            createdJob.run();
         }
     }
 
     @SuppressWarnings("unchecked")
-    private <V> AsynchronousJob createAsyncJob(ScheduledWork work) {
-        return new AsynchronousJob(work.getId(), work.getJob(), work.getParams(),
+    private <T, V> SynchronousJob createJob(ScheduledWork<T, V> work) {
+        return new SynchronousJob(work.getId(), work.getJob(), work.getParams(),
                 new StageListener.StageListenerBuilder<V>()
-                        .onStart(running -> this.running.put(work.getId(), work))
+                        .bindListener(work.getListener())
+                        .onStart(running -> this.runningJob = work)
                         .onComplete(
                                 completed -> {
                                     this.completed.put(work.getId(),
@@ -65,7 +62,8 @@ public class AsyncDispatcher implements Dispatcher {
                                                     completed.getId()
                                             )
                                     );
-                                    this.running.remove(work.getId());
+                                    this.consume();
+                                    this.runningJob = null;
                                 })
                         .onError(
                                 error -> {
@@ -77,9 +75,9 @@ public class AsyncDispatcher implements Dispatcher {
                                                     work.getId()
                                             )
                                     );
-                                    this.running.remove(work.getId());
+                                    this.consume();
+                                    this.runningJob = null;
                                 })
-                        .bindListener(work.getListener())
                         .build()
         );
     }
@@ -95,4 +93,5 @@ public class AsyncDispatcher implements Dispatcher {
                 }
         );
     }
+
 }

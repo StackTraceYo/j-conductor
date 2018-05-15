@@ -1,4 +1,4 @@
-package org.stacktrace.yo.jconductor.core.job.stage;
+package org.stacktrace.yo.jconductor.core.execution.stage;
 
 import java.util.function.Consumer;
 

@@ -1,4 +1,4 @@
-package org.stacktrace.yo.jconductor.core.work;
+package org.stacktrace.yo.jconductor.core.execution.work;
 
 @FunctionalInterface
 public interface Work<T, V> {

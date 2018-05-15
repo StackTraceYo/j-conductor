@@ -1,8 +1,9 @@
-package org.stacktrace.yo.jconductor.core.job;
+package org.stacktrace.yo.jconductor.core.execution.job;
 
-import org.stacktrace.yo.jconductor.core.work.PostRun;
-import org.stacktrace.yo.jconductor.core.work.PreStart;
-import org.stacktrace.yo.jconductor.core.work.Work;
+import org.stacktrace.yo.jconductor.core.execution.work.Job;
+import org.stacktrace.yo.jconductor.core.execution.work.PostRun;
+import org.stacktrace.yo.jconductor.core.execution.work.PreStart;
+import org.stacktrace.yo.jconductor.core.execution.work.Work;
 
 public class AbstractJob<T, V> implements Job<T, V> {
 

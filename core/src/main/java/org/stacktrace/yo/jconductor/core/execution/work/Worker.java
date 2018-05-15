@@ -1,11 +1,9 @@
-package org.stacktrace.yo.jconductor.core.job;
+package org.stacktrace.yo.jconductor.core.execution.work;
 
-import org.stacktrace.yo.jconductor.core.job.stage.JobExecutionStage;
-import org.stacktrace.yo.jconductor.core.job.stage.JobStage;
-import org.stacktrace.yo.jconductor.core.job.stage.StageListener;
-import org.stacktrace.yo.jconductor.core.work.PostRun;
-import org.stacktrace.yo.jconductor.core.work.PreStart;
-import org.stacktrace.yo.jconductor.core.work.Work;
+import org.stacktrace.yo.jconductor.core.execution.job.AbstractJob;
+import org.stacktrace.yo.jconductor.core.execution.stage.JobExecutionStage;
+import org.stacktrace.yo.jconductor.core.execution.stage.JobStage;
+import org.stacktrace.yo.jconductor.core.execution.stage.StageListener;
 
 import java.util.function.Consumer;
 

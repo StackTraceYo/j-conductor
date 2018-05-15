@@ -1,4 +1,4 @@
-package org.stacktrace.yo.jconductor.core.dispatch;
+package org.stacktrace.yo.jconductor.core.dispatch.dispatcher;
 
 public class DispatcherConfig {
 

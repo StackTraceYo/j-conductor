@@ -3,14 +3,10 @@ package org.stacktrace.yo.jconductor.reactive.job;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.schedulers.Schedulers;
-import org.stacktrace.yo.jconductor.core.job.Executable;
-import org.stacktrace.yo.jconductor.core.job.Job;
-import org.stacktrace.yo.jconductor.core.job.Worker;
-import org.stacktrace.yo.jconductor.core.job.stage.JobExecutionStage;
-import org.stacktrace.yo.jconductor.core.job.stage.JobStage;
-import org.stacktrace.yo.jconductor.core.work.PostRun;
-import org.stacktrace.yo.jconductor.core.work.PreStart;
-import org.stacktrace.yo.jconductor.core.work.Work;
+import org.stacktrace.yo.jconductor.core.execution.job.Executable;
+import org.stacktrace.yo.jconductor.core.execution.stage.JobExecutionStage;
+import org.stacktrace.yo.jconductor.core.execution.stage.JobStage;
+import org.stacktrace.yo.jconductor.core.execution.work.*;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -91,7 +87,7 @@ public class ObservableJob<T, V> extends Worker<T, V> implements Executable<Obse
 
     public static void main(String args[]) throws InterruptedException {
 
-        new ObservableJob<String, String>("test_id", params1 -> {
+        new ObservableJob<>("test_id", params1 -> {
             try {
                 System.out.println(Thread.currentThread().getName());
                 Thread.sleep(5000);
