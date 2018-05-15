@@ -29,6 +29,10 @@ public class SynchronousJob<T, V> extends Worker<T, V> implements Executable<V> 
         super(id, work, params, onComplete);
     }
 
+    public SynchronousJob(String id, Work<T, V> work, T params, Consumer<JobStage<V>> onComplete, Consumer<Throwable> onError) {
+        super(id, work, params, onComplete, onError);
+    }
+
     public SynchronousJob(String id, Job<T, V> job, T params, Consumer<JobStage<V>> onComplete) {
         super(id, job, params, onComplete);
     }
@@ -46,15 +50,16 @@ public class SynchronousJob<T, V> extends Worker<T, V> implements Executable<V> 
     }
 
     public V run() {
-        this.job.init(this.params);
-        this.consumeStart();
+        job.init(params);
+        consumeStart();
         try {
-            V result = this.job.doWork(this.params);
-            this.consumeComplete();
-            this.job.postRun();
+            result = job.doWork(params);
+            consumeComplete();
+            job.postRun();
             return result;
         } catch (Exception e) {
             this.consumeError(e);
+            job.postRun();
             return null;
         }
 

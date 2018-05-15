@@ -72,9 +72,15 @@ public abstract class Worker<T, V> {
         this(id, job, params, listener.onComplete(), listener.onError());
     }
 
+    public Worker(String id, Work<T, V> work, T params, Consumer<JobStage<V>> onComplete, Consumer<Throwable> onError) {
+        this(id, work, params);
+        this.onComplete = onComplete;
+        this.onError = onError;
+    }
+
     protected final void consumeStart() {
         this.running = true;
-        if (this.onComplete != null) {
+        if (this.onStart != null) {
             this.onStart.accept(JobExecutionStage.RUNNING.createStage(this.id));
         }
     }
@@ -91,9 +97,5 @@ public abstract class Worker<T, V> {
         if (this.onError != null) {
             this.onError.accept(e);
         }
-    }
-
-    public static final class Builder {
-
     }
 }

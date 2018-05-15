@@ -43,6 +43,10 @@ public class AsynchronousJob<T, V> extends Worker<T, V> implements Executable<Co
         super(id, job, params, onStart, onComplete, onError);
     }
 
+    public AsynchronousJob(String id, Work<T, V> work, T params, Consumer<JobStage<V>> onComplete, Consumer<Throwable> onError) {
+        super(id, work, params, onComplete, onError);
+    }
+
     public AsynchronousJob(String id, Job<T, V> job, T params, StageListener<V> listener) {
         super(id, job, params, listener);
     }
@@ -62,6 +66,7 @@ public class AsynchronousJob<T, V> extends Worker<T, V> implements Executable<Co
             if (throwable != null) {
                 this.consumeError(throwable);
             } else {
+                this.result = v;
                 this.consumeComplete();
             }
             this.job.postRun();
