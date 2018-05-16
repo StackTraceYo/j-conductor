@@ -80,6 +80,7 @@ public abstract class Worker<T, V> {
 
     protected final void consumeStart() {
         this.running = true;
+        this.started = true;
         if (this.onStart != null) {
             this.onStart.accept(JobExecutionStage.RUNNING.createStage(this.id));
         }
@@ -87,6 +88,8 @@ public abstract class Worker<T, V> {
 
     protected final void consumeComplete() {
         this.completed = true;
+        this.running = false;
+        this.started = false;
         if (this.onComplete != null) {
             this.onComplete.accept(JobExecutionStage.COMPLETE.createStage(this.id, this.result));
         }
@@ -94,6 +97,9 @@ public abstract class Worker<T, V> {
 
     protected final void consumeError(Throwable e) {
         this.errored = true;
+        this.completed = true;
+        this.running = false;
+        this.started = false;
         if (this.onError != null) {
             this.onError.accept(e);
         }

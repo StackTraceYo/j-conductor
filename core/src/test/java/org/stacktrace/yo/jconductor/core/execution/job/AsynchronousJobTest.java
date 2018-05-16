@@ -218,27 +218,24 @@ public class AsynchronousJobTest {
     @Test
     public void asynchronousJobsCanBeRun() throws Exception {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
+        List<String> list = new ArrayList<>();
+        List<String> spyList = Mockito.spy(list);
+
         AsynchronousJob<String, String> classUnderTest = new AsynchronousJob<>("test_id", params -> {
             String result = Thread.currentThread().getName() + " " + params;
-            System.out.print(result);
+            spyList.add(result);
             return result;
         }, "Parameter");
         AsynchronousJob<String, String> classUnderTest2 = new AsynchronousJob<>("test_id2", params -> {
             String result = Thread.currentThread().getName() + " " + params;
-            System.out.print(result);
+            spyList.add(result);
             return result;
         }, "Parameter2");
-        CompletableFuture.allOf(classUnderTest.run(executorService), classUnderTest2.run(executorService));
-//        assertEquals("Return Parameter", result);
-        pauseSeconds(5);
+        CompletableFuture.allOf(new CompletableFuture[]{classUnderTest.run(executorService), classUnderTest2.run(executorService)})
+                .join();
+        Mockito.verify(spyList).add("pool-1-thread-1 Parameter");
+        Mockito.verify(spyList).add("pool-1-thread-2 Parameter2");
+        assertEquals(2, spyList.size());
+        executorService.shutdown();
     }
-
-    private void pauseSeconds(int seconds) {
-        try {
-            Thread.sleep(seconds * 1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
 }
