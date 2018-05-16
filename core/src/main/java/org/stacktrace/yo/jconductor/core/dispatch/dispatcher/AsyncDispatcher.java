@@ -3,8 +3,8 @@ package org.stacktrace.yo.jconductor.core.dispatch.dispatcher;
 import org.stacktrace.yo.jconductor.core.dispatch.work.CompletedWork;
 import org.stacktrace.yo.jconductor.core.dispatch.work.ScheduledWork;
 import org.stacktrace.yo.jconductor.core.execution.job.AsynchronousJob;
-import org.stacktrace.yo.jconductor.core.execution.work.Job;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListener;
+import org.stacktrace.yo.jconductor.core.execution.work.Job;
 import org.stacktrace.yo.jconductor.core.util.EmittingQueue;
 
 import java.util.UUID;
@@ -50,6 +50,11 @@ public class AsyncDispatcher implements Dispatcher {
             AsynchronousJob createdJob = createAsyncJob(work);
             createdJob.run(executor);
         }
+    }
+
+    @Override
+    public CompletedWork fetch(String id) {
+        return completed.get(id);
     }
 
     @SuppressWarnings("unchecked")

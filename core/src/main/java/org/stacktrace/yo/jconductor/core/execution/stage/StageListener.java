@@ -23,7 +23,7 @@ public interface StageListener<V> {
         public StageListenerBuilder<V> onInit(Consumer<JobStage<V>> onInit) {
             if (this.onInit != null && onInit != null) {
                 this.onInit = this.onInit.andThen(onInit);
-            } else {
+            } else if(onInit != null) {
                 this.onInit = onInit;
             }
             return this;
@@ -32,7 +32,7 @@ public interface StageListener<V> {
         public StageListenerBuilder<V> onStart(Consumer<JobStage<V>> onStart) {
             if (this.onStart != null && onStart != null) {
                 this.onStart = this.onStart.andThen(onStart);
-            } else {
+            } else if (onStart != null) {
                 this.onStart = onStart;
             }
             return this;
@@ -41,7 +41,7 @@ public interface StageListener<V> {
         public StageListenerBuilder<V> onComplete(Consumer<JobStage<V>> onComplete) {
             if (this.onComplete != null && onComplete != null) {
                 this.onComplete = this.onComplete.andThen(onComplete);
-            } else {
+            } else if(onComplete != null) {
                 this.onComplete = onComplete;
             }
             return this;
@@ -50,7 +50,7 @@ public interface StageListener<V> {
         public StageListenerBuilder<V> onError(Consumer<Throwable> onError) {
             if (this.onError != null && onError != null) {
                 this.onError = this.onError.andThen(onError);
-            } else {
+            } else if(onError != null) {
                 this.onError = onError;
             }
             return this;
