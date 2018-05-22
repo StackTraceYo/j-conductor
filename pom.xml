@@ -61,10 +61,9 @@
     </dependencyManagement>
 
     <modules>
-        <module>orchestrator</module>
-        <module>worker</module>
         <module>core</module>
         <module>reactive</module>
+        <module>remote</module>
     </modules>
 
 </project>

@@ -69,7 +69,7 @@ public abstract class Worker<T, V> {
     }
 
     public Worker(String id, Job<T, V> job, T params, StageListener<V> listener) {
-        this(id, job, params, listener.onComplete(), listener.onError());
+        this(id, job, params, listener.onStart(), listener.onComplete(), listener.onError());
     }
 
     public Worker(String id, Work<T, V> work, T params, Consumer<JobStage<V>> onComplete, Consumer<Throwable> onError) {
