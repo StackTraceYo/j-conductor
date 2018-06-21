@@ -1,8 +1,9 @@
 package org.stacktrace.yo.jconductor.core.dispatch.work;
 
-import org.stacktrace.yo.jconductor.core.execution.work.Job;
 import org.stacktrace.yo.jconductor.core.execution.stage.JobStage;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListener;
+import org.stacktrace.yo.jconductor.core.execution.stage.StageListenerBuilder;
+import org.stacktrace.yo.jconductor.core.execution.work.Job;
 
 import java.util.function.Consumer;
 
@@ -21,7 +22,7 @@ public class ScheduledWork<T, V> {
 
     public ScheduledWork(Job<T, V> job, T params, String id, Consumer<JobStage<V>> onComplete) {
         this(job, params, id);
-        this.stageListener = new StageListener.StageListenerBuilder<V>()
+        this.stageListener = new StageListenerBuilder<V>()
                 .onComplete(onComplete)
                 .build();
 
@@ -29,7 +30,7 @@ public class ScheduledWork<T, V> {
 
     public ScheduledWork(Job<T, V> job, T params, String id, Consumer<JobStage<V>> onComplete, Consumer<Throwable> onError) {
         this(job, params, id);
-        this.stageListener = new StageListener.StageListenerBuilder<V>()
+        this.stageListener = new StageListenerBuilder<V>()
                 .onComplete(onComplete)
                 .onError(onError)
                 .build();
@@ -38,7 +39,7 @@ public class ScheduledWork<T, V> {
 
     public ScheduledWork(Job<T, V> job, T params, String id, Consumer<JobStage<V>> onStart, Consumer<JobStage<V>> onComplete, Consumer<Throwable> onError) {
         this(job, params, id);
-        this.stageListener = new StageListener.StageListenerBuilder<V>()
+        this.stageListener = new StageListenerBuilder<V>()
                 .onStart(onStart)
                 .onComplete(onComplete)
                 .onError(onError)

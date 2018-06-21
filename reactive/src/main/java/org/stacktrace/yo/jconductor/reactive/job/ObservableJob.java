@@ -4,6 +4,7 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.schedulers.Schedulers;
 import org.stacktrace.yo.jconductor.core.execution.job.Executable;
+import org.stacktrace.yo.jconductor.core.execution.job.Worker;
 import org.stacktrace.yo.jconductor.core.execution.stage.JobExecutionStage;
 import org.stacktrace.yo.jconductor.core.execution.stage.JobStage;
 import org.stacktrace.yo.jconductor.core.execution.work.*;

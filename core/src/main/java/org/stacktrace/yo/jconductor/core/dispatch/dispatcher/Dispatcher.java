@@ -13,4 +13,6 @@ public interface Dispatcher {
     void consume();
 
     CompletedWork fetch(String id);
+
+    boolean shutdown();
 }

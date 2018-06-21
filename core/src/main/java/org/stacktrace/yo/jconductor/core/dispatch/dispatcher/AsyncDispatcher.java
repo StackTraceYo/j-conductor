@@ -4,6 +4,7 @@ import org.stacktrace.yo.jconductor.core.dispatch.work.CompletedWork;
 import org.stacktrace.yo.jconductor.core.dispatch.work.ScheduledWork;
 import org.stacktrace.yo.jconductor.core.execution.job.AsynchronousJob;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListener;
+import org.stacktrace.yo.jconductor.core.execution.stage.StageListenerBuilder;
 import org.stacktrace.yo.jconductor.core.execution.work.Job;
 import org.stacktrace.yo.jconductor.core.util.EmittingQueue;
 
@@ -60,7 +61,7 @@ public class AsyncDispatcher implements Dispatcher {
     @SuppressWarnings("unchecked")
     private <V> AsynchronousJob createAsyncJob(ScheduledWork work) {
         return new AsynchronousJob(work.getId(), work.getJob(), work.getParams(),
-                new StageListener.StageListenerBuilder<V>()
+                new StageListenerBuilder<V>()
                         .onStart(running -> this.running.put(work.getId(), work))
                         .onComplete(
                                 completed -> {
@@ -91,6 +92,10 @@ public class AsyncDispatcher implements Dispatcher {
         );
     }
 
+    @Override
+    public boolean shutdown() {
+        return false;
+    }
 
     private EmittingQueue<ScheduledWork> createQueue() {
         return new EmittingQueue<>(

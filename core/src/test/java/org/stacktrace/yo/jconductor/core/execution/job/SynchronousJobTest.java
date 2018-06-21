@@ -2,6 +2,7 @@ package org.stacktrace.yo.jconductor.core.execution.job;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.stacktrace.yo.jconductor.core.execution.stage.StageListenerBuilder;
 import org.stacktrace.yo.jconductor.core.execution.work.Job;
 
 import java.util.ArrayList;
@@ -42,7 +43,10 @@ public class SynchronousJobTest {
         SynchronousJob<String, String> classUnderTest = new SynchronousJob<>("test_id",
                 params -> "Return " + params,
                 "Parameter",
-                onComplete -> spyList.add(onComplete.getStageResult())
+                new StageListenerBuilder<String>()
+                        .onComplete(
+                                onComplete -> spyList.add(onComplete.getStageResult())
+                        ).build()
         );
         String result = classUnderTest.run();
         Mockito.verify(spyList).add("Return Parameter");
@@ -60,8 +64,12 @@ public class SynchronousJobTest {
                     throw new RuntimeException("Error");
                 },
                 "Parameter",
-                onComplete -> spyList.add("Complete Called"),
-                onError -> spyList.add("Error Called")
+                new StageListenerBuilder<String>()
+                        .onComplete(
+                                onComplete -> spyList.add("Complete Called"))
+                        .onError(
+                                onError -> spyList.add("Error Called")
+                        ).build()
         );
         String result = classUnderTest.run();
         assertNull(result);
@@ -92,9 +100,11 @@ public class SynchronousJobTest {
                     }
                 },
                 "Parameter",
-                onStart -> spyList.add(onStart.getId()),
-                onComplete -> spyList.add(onComplete.getStageResult()),
-                onError -> spyList.add(onError.getMessage())
+                new StageListenerBuilder<String>()
+                        .onStart(onStart -> spyList.add(onStart.getId()))
+                        .onComplete(onComplete -> spyList.add(onComplete.getStageResult()))
+                        .onError(onError -> spyList.add(onError.getMessage())
+                        ).build()
         );
         String result = classUnderTest.run();
 
@@ -128,9 +138,11 @@ public class SynchronousJobTest {
                     }
                 },
                 "Parameter",
-                onStart -> spyList.add(onStart.getId()),
-                onComplete -> spyList.add(onComplete.getStageResult()),
-                onError -> spyList.add(onError.getMessage())
+                new StageListenerBuilder<String>()
+                        .onStart(onStart -> spyList.add(onStart.getId()))
+                        .onComplete(onComplete -> spyList.add(onComplete.getStageResult()))
+                        .onError(onError -> spyList.add(onError.getMessage())
+                        ).build()
         );
         String result = classUnderTest.run();
 
@@ -164,9 +176,11 @@ public class SynchronousJobTest {
                     }
                 },
                 "Parameter",
-                onStart -> spyList.add(onStart.getId()),
-                onComplete -> spyList.add(onComplete.getStageResult()),
-                onError -> spyList.add(onError.getMessage())
+                new StageListenerBuilder<String>()
+                        .onStart(onStart -> spyList.add(onStart.getId()))
+                        .onComplete(onComplete -> spyList.add(onComplete.getStageResult()))
+                        .onError(onError -> spyList.add(onError.getMessage())
+                        ).build()
         );
         String result = classUnderTest.run();
 
@@ -200,9 +214,11 @@ public class SynchronousJobTest {
                     }
                 },
                 "Parameter",
-                onStart -> spyList.add(onStart.getId()),
-                onComplete -> spyList.add(onComplete.getStageResult()),
-                onError -> spyList.add(onError.getMessage())
+                new StageListenerBuilder<String>()
+                        .onStart(onStart -> spyList.add(onStart.getId()))
+                        .onComplete(onComplete -> spyList.add(onComplete.getStageResult()))
+                        .onError(onError -> spyList.add(onError.getMessage())
+                        ).build()
         );
         String result = classUnderTest.run();
         assertNull(result);

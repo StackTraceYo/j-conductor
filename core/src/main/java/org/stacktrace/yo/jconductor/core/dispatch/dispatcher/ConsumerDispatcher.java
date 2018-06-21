@@ -6,11 +6,14 @@ import org.stacktrace.yo.jconductor.core.dispatch.work.CompletedWork;
 import org.stacktrace.yo.jconductor.core.dispatch.work.ScheduledWork;
 import org.stacktrace.yo.jconductor.core.execution.job.SynchronousJob;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListener;
+import org.stacktrace.yo.jconductor.core.execution.stage.StageListenerBuilder;
 import org.stacktrace.yo.jconductor.core.execution.work.Job;
 import org.stacktrace.yo.jconductor.core.util.EmittingQueue;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +25,7 @@ public class ConsumerDispatcher implements Dispatcher {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsumerDispatcher.class.getSimpleName());
 
     private final EmittingQueue<ScheduledWork> jobQueue;
-    private final HashMap<String, CompletedWork> completed;
+    private final Map<String, CompletedWork> completed;
     private final ScheduledExecutorService executorService;
     private final ScheduledExecutorService reportExecutor;
     private final AtomicInteger pending;
@@ -31,7 +34,7 @@ public class ConsumerDispatcher implements Dispatcher {
 
     public ConsumerDispatcher() {
         this.jobQueue = createQueue();
-        this.completed = new HashMap<>();
+        this.completed = new ConcurrentHashMap<>();
         this.pending = new AtomicInteger(0);
         this.running = new AtomicInteger(0);
         // two threads, 1 consumer and 1 reporter
@@ -118,7 +121,7 @@ public class ConsumerDispatcher implements Dispatcher {
         return completed.get(id);
     }
 
-    boolean shutdown() {
+    public boolean shutdown() {
         LOGGER.debug("[ConsumerDispatcher] Shutting Down");
         if (this.isRunning()) {
             LOGGER.debug("[ConsumerDispatcher] Waiting for Work to finish");
@@ -139,7 +142,7 @@ public class ConsumerDispatcher implements Dispatcher {
     @SuppressWarnings("unchecked")
     private <T, V> SynchronousJob createJob(ScheduledWork<T, V> work) {
         return new SynchronousJob(work.getId(), work.getJob(), work.getParams(),
-                new StageListener.StageListenerBuilder<V>()
+                new StageListenerBuilder<V>()
                         .bindListener(work.getListener())
                         .onStart(running -> {
                             LOGGER.debug("[ConsumerDispatcher] Job Started: {}", work.getId());
