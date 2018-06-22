@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 
 
@@ -249,9 +250,8 @@ public class AsynchronousJobTest {
         }, "Parameter2");
         CompletableFuture.allOf(new CompletableFuture[]{classUnderTest.run(executorService), classUnderTest2.run(executorService)})
                 .join();
-        Mockito.verify(spyList).add("pool-1-thread-1 Parameter");
-        Mockito.verify(spyList).add("pool-1-thread-2 Parameter2");
         assertEquals(2, spyList.size());
+        assertNotEquals(spyList.get(0), spyList.get(1));
         executorService.shutdown();
     }
 }
