@@ -54,7 +54,7 @@ public class ConsumerDispatcherTest {
         String id = classToTest.schedule(new TestJob(), "String");
         assertNotNull(id);
         classToTest.shutdown();
-        CompletedWork result = classToTest.fetch(id);
+        CompletedWork result = classToTest.getResultStore().getResult(id).get();
         assertTrue(result.getResult().isPresent());
         assertEquals(result.getResult().get(), "Return String");
     }
@@ -75,11 +75,11 @@ public class ConsumerDispatcherTest {
         assertNotNull(id4);
         assertNotNull(id5);
         classToTest.shutdown();
-        CompletedWork result = classToTest.fetch(id);
-        CompletedWork result2 = classToTest.fetch(id2);
-        CompletedWork result3 = classToTest.fetch(id3);
-        CompletedWork result4 = classToTest.fetch(id4);
-        CompletedWork result5 = classToTest.fetch(id5);
+        CompletedWork result = classToTest.getResultStore().getResult(id).get();
+        CompletedWork result2 = classToTest.getResultStore().getResult(id2).get();
+        CompletedWork result3 = classToTest.getResultStore().getResult(id3).get();
+        CompletedWork result4 = classToTest.getResultStore().getResult(id4).get();
+        CompletedWork result5 = classToTest.getResultStore().getResult(id5).get();
         assertTrue(result.getResult().isPresent());
         assertEquals(result.getResult().get(), "Return String");
 
@@ -114,11 +114,11 @@ public class ConsumerDispatcherTest {
 
         classToTest.shutdown();
 
-        CompletedWork result = classToTest.fetch(id);
-        CompletedWork result2 = classToTest.fetch(id2);
-        CompletedWork result3 = classToTest.fetch(id3);
-        CompletedWork result4 = classToTest.fetch(id4);
-        CompletedWork result5 = classToTest.fetch(id5);
+        CompletedWork result = classToTest.getResultStore().getResult(id).get();
+        CompletedWork result2 = classToTest.getResultStore().getResult(id2).get();
+        CompletedWork result3 = classToTest.getResultStore().getResult(id3).get();
+        CompletedWork result4 = classToTest.getResultStore().getResult(id4).get();
+        CompletedWork result5 = classToTest.getResultStore().getResult(id5).get();
 
         assertTrue(result.getResult().isPresent());
         assertEquals(result.getResult().get(), "Return String");

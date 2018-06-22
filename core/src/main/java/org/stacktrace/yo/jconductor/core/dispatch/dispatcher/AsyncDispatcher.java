@@ -1,5 +1,7 @@
 package org.stacktrace.yo.jconductor.core.dispatch.dispatcher;
 
+import org.stacktrace.yo.jconductor.core.dispatch.store.InMemoryResultStore;
+import org.stacktrace.yo.jconductor.core.dispatch.store.ResultStore;
 import org.stacktrace.yo.jconductor.core.dispatch.work.CompletedWork;
 import org.stacktrace.yo.jconductor.core.dispatch.work.ScheduledWork;
 import org.stacktrace.yo.jconductor.core.execution.job.AsynchronousJob;
@@ -8,6 +10,7 @@ import org.stacktrace.yo.jconductor.core.execution.stage.StageListenerBuilder;
 import org.stacktrace.yo.jconductor.core.execution.work.Job;
 import org.stacktrace.yo.jconductor.core.util.EmittingQueue;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -17,7 +20,7 @@ public class AsyncDispatcher implements Dispatcher {
 
     private final EmittingQueue<ScheduledWork> jobQueue;
     private final ConcurrentHashMap<String, ScheduledWork> running;
-    private final ConcurrentHashMap<String, CompletedWork> completed;
+    private final ResultStore myResultStore;
     private final DispatcherConfig config;
     private final ExecutorService executor;
 
@@ -26,7 +29,7 @@ public class AsyncDispatcher implements Dispatcher {
         this.jobQueue = createQueue();
         this.config = config;
         this.running = new ConcurrentHashMap<>();
-        this.completed = new ConcurrentHashMap<>();
+        this.myResultStore = new InMemoryResultStore();
         this.executor = Executors.newFixedThreadPool(config.getMaxConcurrent());
     }
 
@@ -54,8 +57,13 @@ public class AsyncDispatcher implements Dispatcher {
     }
 
     @Override
-    public CompletedWork fetch(String id) {
-        return completed.get(id);
+    public Optional<CompletedWork> fetch(String id) {
+        return myResultStore.getResult(id);
+    }
+
+    @Override
+    public ResultStore getResultStore() {
+        return myResultStore;
     }
 
     @SuppressWarnings("unchecked")
@@ -65,7 +73,7 @@ public class AsyncDispatcher implements Dispatcher {
                         .onStart(running -> this.running.put(work.getId(), work))
                         .onComplete(
                                 completed -> {
-                                    this.completed.put(work.getId(),
+                                    myResultStore.putResult(work.getId(),
                                             new CompletedWork(
                                                     completed.getStageResult(),
                                                     work.getParams(),
@@ -77,7 +85,7 @@ public class AsyncDispatcher implements Dispatcher {
                                 })
                         .onError(
                                 error -> {
-                                    this.completed.put(work.getId(),
+                                    myResultStore.putResult(work.getId(),
                                             new CompletedWork(
                                                     error,
                                                     work.getParams(),

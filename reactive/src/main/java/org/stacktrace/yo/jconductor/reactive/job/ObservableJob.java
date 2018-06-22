@@ -20,14 +20,6 @@ public class ObservableJob<T, V> extends Worker<T, V> implements Executable<Obse
         super(id, job, params);
     }
 
-    public ObservableJob(String id, PreStart<T> pre, Work<T, V> work, T params) {
-        super(id, pre, work, params);
-    }
-
-    public ObservableJob(String id, PreStart<T> pre, Work<T, V> work, PostRun post, T params) {
-        super(id, pre, work, post, params);
-    }
-
     public ObservableJob(String id, Work<T, V> work, T params) {
         super(id, work, params);
     }

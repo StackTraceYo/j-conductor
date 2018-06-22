@@ -10,9 +10,22 @@ import java.util.function.Supplier;
  * <p>
  * This class represents the blueprint for executing some unit of work
  */
-public abstract class JobPlan<T extends Job<V, ?>, V> {
+public abstract class JobPlan<JobType extends Job<JobParams, JobResult>, JobParams, JobResult> {
 
-    public final String myPlanName;
+    final String myPlanName;
+    private String myExecutionId;
+
+    String getPlanName() {
+        return myPlanName;
+    }
+
+    public final void setExecutionId(String id) {
+        myExecutionId = id;
+    }
+
+    public String getExecutionId() {
+        return myExecutionId;
+    }
 
     protected JobPlan(String myPlanName) {
         this.myPlanName = myPlanName;
@@ -58,7 +71,7 @@ public abstract class JobPlan<T extends Job<V, ?>, V> {
      *
      * @return the supplier
      */
-    public abstract Supplier<T> supplyWork();
+    public abstract Supplier<JobType> job();
 
     /**
      * A paramaterized supplier for the {@link Job}. that this plan supports
@@ -67,6 +80,5 @@ public abstract class JobPlan<T extends Job<V, ?>, V> {
      *
      * @return the supplier
      */
-    public abstract Supplier<V> supplyParams();
-
+    public abstract Supplier<JobParams> jobParams();
 }

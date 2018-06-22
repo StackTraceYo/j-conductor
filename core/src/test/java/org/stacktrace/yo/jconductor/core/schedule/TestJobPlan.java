@@ -6,7 +6,7 @@ import org.stacktrace.yo.jconductor.core.execution.work.Job;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-public class TestJobPlan extends JobPlan<TestJobPlan.BasicTestJob, String> {
+public class TestJobPlan extends JobPlan<TestJobPlan.BasicTestJob, String, String> {
 
     public TestJobPlan() {
         super("TestJobPlan");
@@ -50,12 +50,12 @@ public class TestJobPlan extends JobPlan<TestJobPlan.BasicTestJob, String> {
     }
 
     @Override
-    public Supplier<BasicTestJob> supplyWork() {
+    public Supplier<BasicTestJob> job() {
         return BasicTestJob::new;
     }
 
     @Override
-    public Supplier<String> supplyParams() {
+    public Supplier<String> jobParams() {
         return () -> "Supplied Params";
     }
 }

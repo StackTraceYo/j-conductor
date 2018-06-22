@@ -1,8 +1,8 @@
 package org.stacktrace.yo.jconductor.core.execution.work;
 
 @FunctionalInterface
-public interface Work<T, V> {
+public interface Work<Param, Result> {
 
-    V doWork(T params);
+    Result doWork(Param params);
 
 }
