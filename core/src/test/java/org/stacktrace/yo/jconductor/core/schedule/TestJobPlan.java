@@ -40,11 +40,6 @@ public class TestJobPlan extends JobPlan<TestJobPlan.BasicTestJob, String, Strin
     }
 
     @Override
-    public Integer priority() {
-        return 0;
-    }
-
-    @Override
     public TimeUnit timeUnit() {
         return TimeUnit.SECONDS;
     }

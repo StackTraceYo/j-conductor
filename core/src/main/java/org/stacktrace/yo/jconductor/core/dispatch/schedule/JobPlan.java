@@ -50,16 +50,6 @@ public abstract class JobPlan<JobType extends Job<JobParams, JobResult>, JobPara
     public abstract int period();
 
     /**
-     * Prioity.
-     * <p>
-     * <p>
-     * If there are multiple jobs running, the scheduler will pick the plan with highest priority
-     *
-     * @return the int
-     */
-    public abstract Integer priority();
-
-    /**
      * Time unit in which the initial delay and the periodic executions are performed
      *
      * @return the time unit
