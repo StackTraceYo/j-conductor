@@ -2,19 +2,27 @@ package org.stacktrace.yo.jconductor.core.dispatch.dispatcher;
 
 public class DispatcherConfig {
 
-    private final boolean runAsync;
-    private final int maxConcurrent;
+    private int maxConcurrent;
+    private boolean scheduleEnabled;
 
-    public DispatcherConfig(boolean runAsync, int maxConcurrent) {
-        this.runAsync = runAsync;
-        this.maxConcurrent = maxConcurrent;
-    }
-
-    public boolean isRunAsync() {
-        return runAsync;
+    public DispatcherConfig() {
     }
 
     public int getMaxConcurrent() {
         return maxConcurrent;
+    }
+
+    public DispatcherConfig setMaxConcurrent(int maxConcurrent) {
+        this.maxConcurrent = maxConcurrent;
+        return this;
+    }
+
+    public boolean isScheduleEnabled() {
+        return scheduleEnabled;
+    }
+
+    public DispatcherConfig setScheduleEnabled(boolean scheduleEnabled) {
+        this.scheduleEnabled = scheduleEnabled;
+        return this;
     }
 }
