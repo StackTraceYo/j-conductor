@@ -13,7 +13,12 @@ public class OrchestratorRestProtocol {
 
         REGISTER("/register"),
         UNREGISTER("/unregister"),
-        NOTIFY("/job/complete");
+        NOTIFY("/job/complete"),
+        JOB("/job/"),
+        DONE("/job/done"),
+        PENDING("/job/pending"),
+        JOB_DETAIL("/job/:job_id"),
+        JOB_RESULT("/job/:job_id/result");
 
         private String path;
 
