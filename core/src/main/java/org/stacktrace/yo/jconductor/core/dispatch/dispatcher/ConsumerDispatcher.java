@@ -2,8 +2,10 @@ package org.stacktrace.yo.jconductor.core.dispatch.dispatcher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.stacktrace.yo.jconductor.core.dispatch.schedule.SchedulingDispatcher;
 import org.stacktrace.yo.jconductor.core.dispatch.store.InMemoryResultStore;
 import org.stacktrace.yo.jconductor.core.dispatch.store.ResultStore;
+import org.stacktrace.yo.jconductor.core.dispatch.store.ResultStoringDispatcher;
 import org.stacktrace.yo.jconductor.core.dispatch.work.CompletedWork;
 import org.stacktrace.yo.jconductor.core.dispatch.work.ScheduledWork;
 import org.stacktrace.yo.jconductor.core.execution.job.SynchronousJob;
@@ -20,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 
-public class ConsumerDispatcher implements SchedulingDispatcher {
+public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDispatcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsumerDispatcher.class.getSimpleName());
 
@@ -78,7 +80,6 @@ public class ConsumerDispatcher implements SchedulingDispatcher {
         return jobQueue.offer(scheduledWork) ? id : "Unable To Queue";
     }
 
-    @Override
     @SuppressWarnings("unchecked")
     public void consume() {
         ScheduledWork work = this.jobQueue.poll();
@@ -187,7 +188,6 @@ public class ConsumerDispatcher implements SchedulingDispatcher {
                         .build()
         );
     }
-
 
     private EmittingQueue<ScheduledWork> createQueue() {
         return new EmittingQueue<>(

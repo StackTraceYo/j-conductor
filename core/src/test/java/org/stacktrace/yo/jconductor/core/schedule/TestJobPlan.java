@@ -1,6 +1,5 @@
 package org.stacktrace.yo.jconductor.core.schedule;
 
-import org.stacktrace.yo.jconductor.core.dispatch.flow.JobFlow;
 import org.stacktrace.yo.jconductor.core.dispatch.schedule.JobPlan;
 import org.stacktrace.yo.jconductor.core.execution.work.Job;
 
@@ -55,17 +54,4 @@ public class TestJobPlan extends JobPlan<TestJobPlan.BasicTestJob, String, Strin
         return () -> "Supplied Params";
     }
 
-    public static void main(String[] args) {
-        new JobFlow()
-                .addPlan(new TestJobPlan())
-                .thenRun(new TestJobPlan())
-                .andThenRun(
-                        new JobFlow.JobPlanFlow(new TestJobPlan())
-                                .thenRun(new TestJobPlan())
-                                .thenRun(new TestJobPlan())
-                                .andThenRun(
-                                        new JobFlow.JobPlanFlow(new TestJobPlan())
-                                )
-                );
-    }
 }

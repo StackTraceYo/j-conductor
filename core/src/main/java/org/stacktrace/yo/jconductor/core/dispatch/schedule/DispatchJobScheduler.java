@@ -1,6 +1,5 @@
 package org.stacktrace.yo.jconductor.core.dispatch.schedule;
 
-import org.stacktrace.yo.jconductor.core.dispatch.dispatcher.SchedulingDispatcher;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListener;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListenerBuilder;
 import org.stacktrace.yo.jconductor.core.execution.work.Job;

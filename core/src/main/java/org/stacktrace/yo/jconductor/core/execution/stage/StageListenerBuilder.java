@@ -4,20 +4,9 @@ import java.util.function.Consumer;
 
 public final class StageListenerBuilder<V> {
 
-    private Consumer<JobStage<V>> onInit;
     private Consumer<JobStage<V>> onStart;
     private Consumer<JobStage<V>> onComplete;
     private Consumer<Throwable> onError;
-
-
-    public StageListenerBuilder<V> onInit(Consumer<JobStage<V>> onInit) {
-        if (this.onInit != null && onInit != null) {
-            this.onInit = this.onInit.andThen(onInit);
-        } else if (onInit != null) {
-            this.onInit = onInit;
-        }
-        return this;
-    }
 
     public StageListenerBuilder<V> onStart(Consumer<JobStage<V>> onStart) {
         if (this.onStart != null && onStart != null) {
@@ -48,7 +37,6 @@ public final class StageListenerBuilder<V> {
 
     public StageListenerBuilder<V> bindListener(StageListener<V> listener) {
         if (listener != null) {
-            onInit(listener.onInit());
             onStart(listener.onStart());
             onComplete(listener.onComplete());
             onError(listener.onError());
@@ -59,10 +47,6 @@ public final class StageListenerBuilder<V> {
     public StageListener<V> build() {
 
         return new StageListener<V>() {
-            @Override
-            public Consumer<JobStage<V>> onInit() {
-                return onInit;
-            }
 
             @Override
             public Consumer<JobStage<V>> onStart() {

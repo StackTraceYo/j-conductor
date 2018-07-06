@@ -1,4 +1,4 @@
-package org.stacktrace.yo.jconductor.core.dispatch.dispatcher;
+package org.stacktrace.yo.jconductor.core.dispatch.schedule;
 
 import java.util.concurrent.ScheduledExecutorService;
 

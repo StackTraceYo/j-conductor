@@ -13,11 +13,5 @@ public interface Dispatcher {
 
     <T, V> String schedule(Job<T, V> job, T params, StageListener<V> listener);
 
-    void consume();
-
     boolean shutdown();
-
-    Optional<CompletedWork> fetch(String id);
-
-    ResultStore getResultStore();
 }
