@@ -5,8 +5,49 @@ import akka.testkit.javadsl.TestKit;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.stacktrace.yo.jconductor.core.execution.work.Job;
+
+import static org.junit.Assert.assertNotNull;
 
 public class ActorDispatcherTest {
+
+    private static class TestJob implements Job<String, String> {
+        @Override
+        public String doWork(String params) {
+            return "Return " + params;
+        }
+
+        @Override
+        public void postRun() {
+            System.out.println("Cleanup");
+        }
+
+        @Override
+        public void init(String params) {
+            System.out.println("Params: " + params);
+        }
+    }
+
+    private static class SlowTestJob implements Job<String, String> {
+        @Override
+        public String doWork(String params) {
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+            }
+            return "Return " + params;
+        }
+
+        @Override
+        public void postRun() {
+            System.out.println("Cleanup");
+        }
+
+        @Override
+        public void init(String params) {
+            System.out.println("Params: " + params);
+        }
+    }
 
     private static ActorSystem system;
 
@@ -22,16 +63,25 @@ public class ActorDispatcherTest {
     }
 
     @Test
-    public void testReplyWithMatchGroupJoined() throws InterruptedException {
-        TestKit probe = new TestKit(system);
+    public void testDispatcher() throws InterruptedException {
         ActorDispatcher dispatcher = new ActorDispatcher(5, "TestDispatcher", system);
-        dispatcher.test();
-        dispatcher.test();
-        dispatcher.test();
-        dispatcher.test();
-        dispatcher.test();
-//        Thread.sleep(5000);
+        String id = dispatcher.schedule(new TestJob(), "Test");
+        assertNotNull(id);
     }
 
+    @Test
+    public void testDispatcherMultiple() throws InterruptedException {
+        ActorDispatcher dispatcher = new ActorDispatcher(5, "TestDispatcher", system);
+        String id = dispatcher.schedule(new TestJob(), "Test");
+        String id2 = dispatcher.schedule(new TestJob(), "Test2");
+        String id3 = dispatcher.schedule(new TestJob(), "Test3");
+        String id4 = dispatcher.schedule(new TestJob(), "Test4");
+        String id5 = dispatcher.schedule(new TestJob(), "Test5");
+        assertNotNull(id);
+        assertNotNull(id2);
+        assertNotNull(id3);
+        assertNotNull(id4);
+        assertNotNull(id5);
+    }
 
 }
