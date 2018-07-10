@@ -6,6 +6,7 @@ import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
 import org.stacktrace.yo.jconductor.akka.core.actor.DispatchActor
+import org.stacktrace.yo.jconductor.akka.core.work.JobProtocol
 import org.stacktrace.yo.jconductor.akka.core.work.JobProtocol._
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListener
 import org.stacktrace.yo.jconductor.core.execution.work.Job
@@ -26,7 +27,7 @@ class ActorDispatcher(val myWorkerCount: Int, val myDispatcherName: String = "Ac
   //  def scheduleAsync[T, V](job: Job[T, V], params: T, listener: StageListener[V]): Future[V] = ???
   //
 
-  def getStatus(): DispatcherStatus = {
+  def getStatus: JobProtocol.DispatcherStatus = {
     Await.result(
       myDispatcher.ask(Status())
         .mapTo[DispatcherStatus],

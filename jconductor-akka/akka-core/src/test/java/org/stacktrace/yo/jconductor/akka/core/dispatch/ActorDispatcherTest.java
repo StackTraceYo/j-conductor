@@ -12,7 +12,7 @@ import static org.junit.Assert.assertNotNull;
 
 public class ActorDispatcherTest {
 
-    private static class TestJob implements Job<String, String> {
+    public static class TestJob implements Job<String, String> {
         @Override
         public String doWork(String params) {
             return "Return " + params;
@@ -29,7 +29,7 @@ public class ActorDispatcherTest {
         }
     }
 
-    private static class SlowTestJob implements Job<String, String> {
+    public static class SlowTestJob implements Job<String, String> {
         @Override
         public String doWork(String params) {
             try {
