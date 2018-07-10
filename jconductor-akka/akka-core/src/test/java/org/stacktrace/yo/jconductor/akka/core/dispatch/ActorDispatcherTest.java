@@ -7,6 +7,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.stacktrace.yo.jconductor.core.execution.work.Job;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class ActorDispatcherTest {
@@ -32,7 +33,7 @@ public class ActorDispatcherTest {
         @Override
         public String doWork(String params) {
             try {
-                Thread.sleep(2000);
+                Thread.sleep(3000);
             } catch (InterruptedException e) {
             }
             return "Return " + params;
@@ -75,7 +76,7 @@ public class ActorDispatcherTest {
         String id = dispatcher.schedule(new TestJob(), "Test");
         String id2 = dispatcher.schedule(new TestJob(), "Test2");
         String id3 = dispatcher.schedule(new TestJob(), "Test3");
-        String id4 = dispatcher.schedule(new TestJob(), "Test4");
+        String id4 = dispatcher.schedule(new TestJob(), "Test4", null);
         String id5 = dispatcher.schedule(new TestJob(), "Test5");
         assertNotNull(id);
         assertNotNull(id2);
@@ -83,5 +84,40 @@ public class ActorDispatcherTest {
         assertNotNull(id4);
         assertNotNull(id5);
     }
+
+    @Test
+    public void testDispatcherAwait() throws InterruptedException {
+        ActorDispatcher dispatcher = new ActorDispatcher(5, "TestDispatcher", system);
+        String id = dispatcher.scheduleAndWait(new TestJob(), "Test");
+        assertNotNull(id);
+    }
+
+    @Test
+    public void testDispatcherMultipleAwait() throws InterruptedException {
+        ActorDispatcher dispatcher = new ActorDispatcher(5, "TestDispatcher", system);
+        String id = dispatcher.scheduleAndWait(new TestJob(), "Test");
+        String id2 = dispatcher.scheduleAndWait(new TestJob(), "Test2");
+        String id3 = dispatcher.scheduleAndWait(new TestJob(), "Test3");
+        String id4 = dispatcher.scheduleAndWait(new TestJob(), "Test4");
+        String id5 = dispatcher.scheduleAndWait(new TestJob(), "Test5");
+        assertNotNull(id);
+        assertNotNull(id2);
+        assertNotNull(id3);
+        assertNotNull(id4);
+        assertNotNull(id5);
+    }
+
+    @Test
+    public void testDispatcherStatus() throws InterruptedException {
+        ActorDispatcher dispatcher = new ActorDispatcher(5, "TestDispatcher", system);
+        dispatcher.schedule(new SlowTestJob(), "Test");
+        dispatcher.schedule(new SlowTestJob(), "Test2");
+        dispatcher.schedule(new SlowTestJob(), "Test3");
+        dispatcher.schedule(new SlowTestJob(), "Test4");
+        dispatcher.schedule(new SlowTestJob(), "Test5");
+        assertEquals(0 ,dispatcher.getStatus().pending());
+        assertEquals(5 ,dispatcher.getStatus().running());
+    }
+
 
 }

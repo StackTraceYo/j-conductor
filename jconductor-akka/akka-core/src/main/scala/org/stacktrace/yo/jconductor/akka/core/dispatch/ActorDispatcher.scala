@@ -6,7 +6,7 @@ import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.pattern.ask
 import akka.util.Timeout
 import org.stacktrace.yo.jconductor.akka.core.actor.DispatchActor
-import org.stacktrace.yo.jconductor.akka.core.work.JobProtocol.{JobCommand, JobScheduled, ScheduleJob}
+import org.stacktrace.yo.jconductor.akka.core.work.JobProtocol._
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListener
 import org.stacktrace.yo.jconductor.core.execution.work.Job
 
@@ -26,24 +26,42 @@ class ActorDispatcher(val myWorkerCount: Int, val myDispatcherName: String = "Ac
   //  def scheduleAsync[T, V](job: Job[T, V], params: T, listener: StageListener[V]): Future[V] = ???
   //
 
-  def schedule[T, V](job: Job[T, V], params: T): String = {
-    val id = createId()
+  def getStatus(): DispatcherStatus = {
     Await.result(
-      askCommand(ScheduleJob(job, params, id))
-        .mapTo[JobScheduled]
+      myDispatcher.ask(Status())
+        .mapTo[DispatcherStatus],
+      1 seconds)
+  }
+
+  def scheduleAndWait[T, V](job: Job[T, V], params: T): String = {
+    Await.result(
+      createCommand(job, params, null)._2
+        .mapTo[Accepted]
         .map(js => js.id),
       1 seconds
     )
   }
 
-  def schedule[T, V](job: Job[T, V], params: T, listener: StageListener[V]): String = {
-    val id = createId()
+  def scheduleAndWait[T, V](job: Job[T, V], params: T, listener: StageListener[V]): String = {
     Await.result(
-      askCommand(ScheduleJob(job, params, id))
-        .mapTo[JobScheduled]
+      createCommand(job, params, listener)._2
+        .mapTo[Accepted]
         .map(js => js.id),
       1 seconds
     )
+  }
+
+  def schedule[T, V](job: Job[T, V], params: T): String = {
+    createCommand(job, params, null)._1
+  }
+
+  def schedule[T, V](job: Job[T, V], params: T, listener: StageListener[V]): String = {
+    createCommand(job, params, listener)._1
+  }
+
+  private def createCommand[T, V](job: Job[T, V], params: T, listener: StageListener[V]) = {
+    val id = createId()
+    (id, askCommand(ScheduleJob((job, params, Option(listener)), id)))
   }
 
   private def askCommand(jobCommand: JobCommand) = {

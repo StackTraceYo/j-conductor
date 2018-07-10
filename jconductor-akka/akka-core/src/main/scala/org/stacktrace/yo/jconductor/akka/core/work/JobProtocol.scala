@@ -5,15 +5,16 @@ import org.stacktrace.yo.jconductor.core.execution.work.Job
 
 object JobProtocol {
 
+
   sealed trait JobCommand
 
-  sealed trait ScheduleJobCommand
+  sealed trait ScheduleJobCommand extends JobCommand
 
-  case class ScheduleJob[Param, Result](job: Job[Param, Result], params: Param, id: String) extends JobCommand with ScheduleJobCommand
+  case class ScheduleJob[Param, Result](work: WorkParams[Param, Result], id: String) extends ScheduleJobCommand
 
-  case class ScheduleJobWithListener[Param, Result](job: Job[Param, Result], params: Param, listener: StageListener[Result], id: String) extends JobCommand with ScheduleJobCommand
+  case class Rejected[Param, Result](work: WorkParams[Param, Result], id: String) extends ScheduleJobCommand
 
-  case class JobScheduled(id: String) extends JobCommand
+  case class Accepted(id: String) extends ScheduleJobCommand
 
   case class JobStarted(id: String) extends JobCommand
 
@@ -21,4 +22,13 @@ object JobProtocol {
 
   case class JobErrored(id: String, error: Throwable) extends JobCommand
 
+  case class Start() extends JobCommand
+
+  case class Close() extends JobCommand
+
+  case class Status() extends JobCommand
+
+  case class DispatcherStatus(running: Int, pending: Int)
+
+  type WorkParams[Param, Result] = (Job[Param, Result], Param, Option[StageListener[Result]])
 }

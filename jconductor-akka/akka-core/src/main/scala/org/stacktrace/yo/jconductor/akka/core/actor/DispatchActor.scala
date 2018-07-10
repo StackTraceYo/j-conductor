@@ -7,8 +7,6 @@ import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.event.LoggingAdapter
 import akka.routing.RoundRobinPool
 import org.stacktrace.yo.jconductor.akka.core.work.JobProtocol._
-import org.stacktrace.yo.jconductor.core.execution.stage.StageListener
-import org.stacktrace.yo.jconductor.core.execution.work.Job
 
 class DispatchActor(val myWorkerCount: Int, val myDispatcherName: String) extends Actor with ActorLogging {
 
@@ -20,19 +18,45 @@ class DispatchActor(val myWorkerCount: Int, val myDispatcherName: String) extend
 
   override def receive: Receive = {
 
-    case scheduleJob@ScheduleJob(job: Job[Any, Any], params: Any, id: String) =>
+    case scheduleJob@ScheduleJob(work: WorkParams[Any, Any], id: String) =>
+      sender() ! Accepted(id)
       schedule(scheduleJob, id)
-      sender() ! JobScheduled(id)
-    case scheduleJob@ScheduleJobWithListener(job: Job[Any, Any], params: Any, listener: StageListener[Any], id: String) =>
-      schedule(scheduleJob, id)
-      sender() ! JobScheduled(id)
+    case Rejected(work, id) =>
+      schedule(ScheduleJob((work._1, work._2, work._3), id), id)
+    case Accepted(id) =>
+      accept(id)
+    case JobStarted(id) =>
+      started(id)
+    case JobComplete(id, result) =>
+      finish(id, result)
+    case JobErrored(id, throwable) =>
+      finish(id, throwable)
+    case Status() =>
+      sender() ! DispatcherStatus(myRunningCount.get(), myPendingCount.get())
   }
 
-  def schedule(job: ScheduleJobCommand, id: String): Unit = {
+  private def schedule(job: ScheduleJobCommand, id: String): Unit = {
     myLogger.debug("Scheduling {}", id)
-    myPendingCount.getAndIncrement()
     myWorkers ! job
+  }
+
+  private def finish(id: String, result: Any): Unit = {
+    myRunningCount.getAndDecrement()
+    result match {
+      case e: Throwable => myJobs.replace(id, "Errored")
+      case _: Any => myJobs.replace(id, "Complete")
+    }
+  }
+
+  private def accept(id: String): Unit = {
+    myPendingCount.getAndIncrement()
     myJobs.put(id, "Pending")
+  }
+
+  private def started(id: String): Unit = {
+    myRunningCount.getAndIncrement()
+    myPendingCount.getAndDecrement()
+    myJobs.put(id, "Running")
   }
 
 }
