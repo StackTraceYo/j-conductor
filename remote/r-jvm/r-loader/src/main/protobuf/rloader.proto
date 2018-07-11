@@ -1,0 +1,22 @@
+syntax = "proto3";
+package rloader;
+
+option java_package = "org.stacktrace.yo.proto.rloader";
+option java_outer_classname = "RLoader";
+
+message ConnectionRecieved {
+    bool ready = 1;
+    string id = 2;
+}
+
+message RLoaderMessage {
+    oneof request {
+        LoadClass loadClass = 1;
+    }
+}
+
+message LoadClass {
+    string resource = 1;
+    string id = 2;
+    bool check = 3;
+}

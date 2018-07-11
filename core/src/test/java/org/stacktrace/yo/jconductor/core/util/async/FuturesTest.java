@@ -77,7 +77,7 @@ public class FuturesTest {
         List<CompletableFuture<String>> futures = Lists.newArrayList(one, two, three, four);
 
         //Creates a single future of all finished futures
-        List<String> joined = Futures.toFutureList(futures)
+        List<String> joined = Futures.ofAll(futures)
                 .join();
         assertEquals(4, joined.size());
         // submission order

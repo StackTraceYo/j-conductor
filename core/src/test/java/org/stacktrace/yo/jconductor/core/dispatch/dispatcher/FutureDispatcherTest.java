@@ -91,7 +91,7 @@ public class FutureDispatcherTest {
                 classToTest.scheduleAsync(new SlowTestJob(2000), "String5")
         );
 
-        List<String> results = Futures.toFutureList(futures)
+        List<String> results = Futures.ofAll(futures)
                 .join();
 
         assertEquals(results.get(0), "Return String");
@@ -112,7 +112,7 @@ public class FutureDispatcherTest {
                 classToTest.scheduleAsync(new SlowTestJob(2000), "String5")
         );
 
-        List<String> results = Futures.toFutureList(futures)
+        List<String> results = Futures.ofAll(futures)
                 .join();
 
         assertEquals(results.get(0), "Return String");

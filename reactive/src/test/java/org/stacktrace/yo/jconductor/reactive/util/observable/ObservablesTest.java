@@ -230,7 +230,7 @@ public class ObservablesTest {
                 Observables.fromObservable(ob, scheduler), Observables.fromObservable(ob2, scheduler),
                 Observables.fromObservable(ob3, scheduler), Observables.fromObservable(ob4, scheduler));
 
-        List<String> joined = Futures.toFutureList(futures)
+        List<String> joined = Futures.ofAll(futures)
                 .join();
         assertEquals(4, joined.size());
         // submission order

@@ -24,7 +24,7 @@ import java.util.stream.IntStream;
 
 public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDispatcher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConsumerDispatcher.class.getSimpleName());
+    private static final Logger myLogger = LoggerFactory.getLogger(ConsumerDispatcher.class.getSimpleName());
 
     private final EmittingQueue<ScheduledWork> jobQueue;
     private final ResultStore myResultStore;
@@ -67,7 +67,7 @@ public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDi
     public <T, V> String schedule(Job<T, V> job, T params) {
         String id = UUID.randomUUID().toString();
         ScheduledWork<T, V> scheduledWork = new ScheduledWork<>(job, params, id);
-        LOGGER.debug("[ConsumerDispatcher] scheduling new job {}", id);
+        myLogger.debug("[ConsumerDispatcher] scheduling new job {}", id);
         return jobQueue.offer(scheduledWork) ? id : "Unable To Queue";
     }
 
@@ -76,7 +76,7 @@ public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDi
     public <T, V> String schedule(Job<T, V> job, T params, StageListener<V> listener) {
         String id = UUID.randomUUID().toString();
         ScheduledWork<T, V> scheduledWork = new ScheduledWork<>(job, params, id, listener);
-        LOGGER.debug("[ConsumerDispatcher] scheduling new job {}", id);
+        myLogger.debug("[ConsumerDispatcher] scheduling new job {}", id);
         return jobQueue.offer(scheduledWork) ? id : "Unable To Queue";
     }
 
@@ -84,11 +84,11 @@ public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDi
     public void consume() {
         ScheduledWork work = this.jobQueue.poll();
         if (work != null) {
-            LOGGER.debug("[ConsumerDispatcher] Worker {} - Job Found: {}", Thread.currentThread().getName(), work.getId());
+            myLogger.debug("[ConsumerDispatcher] Worker {} - Job Found: {}", Thread.currentThread().getName(), work.getId());
             SynchronousJob createdJob = createJob(work);
             createdJob.run();
         } else {
-            LOGGER.debug("[ConsumerDispatcher] Nothing in Queue");
+            myLogger.debug("[ConsumerDispatcher] Nothing in Queue");
         }
     }
 
@@ -96,23 +96,23 @@ public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDi
         return () -> {
             try {
                 if (jobQueue.peek() != null) {
-                    LOGGER.debug("[ConsumerDispatcher] Consuming");
+                    myLogger.debug("[ConsumerDispatcher] Consuming");
                     consume();
                 }
             } catch (Exception e) {
-                LOGGER.error("[ConsumerDispatcher] Queue Thread Error Restarting");
+                myLogger.error("[ConsumerDispatcher] Queue Thread Error Restarting");
             }
         };
     }
 
     private Runnable startReporter() {
         return () -> {
-            LOGGER.debug("[ConsumerDispatcher] Report");
+            myLogger.debug("[ConsumerDispatcher] Report");
             try {
-                LOGGER.debug("[ConsumerDispatcher] Pending: {} ", this.pending.toString());
-                LOGGER.debug("[ConsumerDispatcher] Running: {} ", this.running.toString());
+                myLogger.debug("[ConsumerDispatcher] Pending: {} ", this.pending.toString());
+                myLogger.debug("[ConsumerDispatcher] Running: {} ", this.running.toString());
             } catch (Exception e) {
-                LOGGER.error("[ConsumerDispatcher] Report Thread Errored");
+                myLogger.error("[ConsumerDispatcher] Report Thread Errored");
             }
         };
     }
@@ -123,20 +123,20 @@ public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDi
     }
 
     public boolean shutdown() {
-        LOGGER.debug("[ConsumerDispatcher] Shutting Down");
+        myLogger.debug("[ConsumerDispatcher] Shutting Down");
         if (this.isRunning()) {
-            LOGGER.debug("[ConsumerDispatcher] Waiting for Work to finish");
+            myLogger.debug("[ConsumerDispatcher] Waiting for Work to finish");
             while (this.isRunning()) {
             }
         }
-        LOGGER.debug("[ConsumerDispatcher] Pending: {} ", this.pending.toString());
-        LOGGER.debug("[ConsumerDispatcher] Running: {} ", this.running.toString());
-        LOGGER.debug("[ConsumerDispatcher] Shutting Down");
+        myLogger.debug("[ConsumerDispatcher] Pending: {} ", this.pending.toString());
+        myLogger.debug("[ConsumerDispatcher] Running: {} ", this.running.toString());
+        myLogger.debug("[ConsumerDispatcher] Shutting Down");
         this.executorService.shutdown();
         this.schedulerService.shutdown();
         while (this.isActive()) {
         }
-        LOGGER.debug("[ConsumerDispatcher] Shut Down Gracefully");
+        myLogger.debug("[ConsumerDispatcher] Shut Down Gracefully");
         return true;
     }
 
@@ -157,11 +157,11 @@ public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDi
                 new StageListenerBuilder<V>()
                         .bindListener(work.getListener())
                         .onStart(running -> {
-                            LOGGER.debug("[ConsumerDispatcher] Job Started: {}", work.getId());
+                            myLogger.debug("[ConsumerDispatcher] Job Started: {}", work.getId());
                         })
                         .onComplete(
                                 completed -> {
-                                    LOGGER.debug("[ConsumerDispatcher] Job Completed: {}", work.getId());
+                                    myLogger.debug("[ConsumerDispatcher] Job Completed: {}", work.getId());
                                     myResultStore.putResult(work.getId(),
                                             new CompletedWork(
                                                     completed.getStageResult(),
@@ -174,7 +174,7 @@ public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDi
                                 })
                         .onError(
                                 error -> {
-                                    LOGGER.error("[ConsumerDispatcher] Job Errored: {}", work.getId(), error);
+                                    myLogger.error("[ConsumerDispatcher] Job Errored: {}", work.getId(), error);
                                     myResultStore.putResult(work.getId(),
                                             new CompletedWork(
                                                     error,
