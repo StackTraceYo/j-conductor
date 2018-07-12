@@ -7,6 +7,7 @@ import org.java_websocket.server.WebSocketServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.stacktrace.yo.proto.rloader.RLoader;
+import org.stacktrace.yo.rjvm.provider.RemoteClassProvider;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -14,16 +15,22 @@ import java.nio.charset.StandardCharsets;
 
 public class ClassLoaderServer extends WebSocketServer {
 
+    private final RemoteClassProvider myClassProvider;
+
     private static final Logger myLogger = LoggerFactory.getLogger(ClassLoaderServer.class.getSimpleName());
 
     public ClassLoaderServer(InetSocketAddress address) {
         super(address);
-        myLogger.debug("Server Started");
-        Thread.currentThread().getContextClassLoader();
+        myClassProvider = new RemoteClassProvider();
     }
 
     public ClassLoaderServer(Integer port) {
         this(new InetSocketAddress(port));
+    }
+
+    @Override
+    public void onStart() {
+        myLogger.debug("Server Started");
     }
 
     @Override
@@ -51,21 +58,24 @@ public class ClassLoaderServer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, ByteBuffer buffer) {
-        myLogger.debug("[ClassLoader Server] ByteBuffer Message Received");
+        myLogger.debug("[ClassLoader Server] Message Received");
         try {
             RLoader.RLoaderMessage message = RLoader.RLoaderMessage
                     .parseFrom(buffer);
+            switch (message.getMessageCase()){
+                case LOADCLASS:
+                    RLoader.ClassLoaded classLoaded = myClassProvider.findClass(message.getLoadClass());
+                case FINISHEDLOADING:
+                case MESSAGE_NOT_SET:
+
+            }
+
         } catch (InvalidProtocolBufferException e) {
         }
     }
 
     @Override
     public void onError(WebSocket conn, Exception e) {
-
-    }
-
-    @Override
-    public void onStart() {
 
     }
 }

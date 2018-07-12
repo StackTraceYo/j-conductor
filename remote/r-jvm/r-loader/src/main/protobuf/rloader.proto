@@ -10,13 +10,24 @@ message ConnectionRecieved {
 }
 
 message RLoaderMessage {
-    oneof request {
+    oneof message {
         LoadClass loadClass = 1;
+        ClassLoaded classLoaded = 2;
+        Finished finishedLoading = 3;
     }
 }
 
 message LoadClass {
     string resource = 1;
     string id = 2;
-    bool check = 3;
+}
+
+message ClassLoaded {
+    bytes resource = 1;
+    bytes hash = 2;
+    string id = 3;
+}
+
+message Finished {
+    string id = 1;
 }
