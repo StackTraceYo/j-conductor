@@ -2,16 +2,16 @@ package org.stacktrace.yo.rjvm;
 
 import org.stacktrace.yo.rjvm.ws.server.ClassLoaderServer;
 
-public class RLoader {
+public class RLoaderRunner {
 
     private final ClassLoaderServer myServer;
 
-    public RLoader() {
+    public RLoaderRunner() {
         myServer = new ClassLoaderServer(8889);
     }
 
     public static void main(String... args) {
-        RLoader loader = new RLoader();
+        RLoaderRunner loader = new RLoaderRunner();
     }
 
 }
