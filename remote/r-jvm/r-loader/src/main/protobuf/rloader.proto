@@ -4,17 +4,20 @@ package rloader;
 option java_package = "org.stacktrace.yo.proto.rloader";
 option java_outer_classname = "RLoader";
 
-message ConnectionRecieved {
-    bool ready = 1;
-    string id = 2;
-}
 
 message RLoaderMessage {
     oneof message {
-        LoadClass loadClass = 1;
-        ClassLoaded classLoaded = 2;
-        Finished finishedLoading = 3;
+        ConnectionRecieved connected = 1;
+        LoadClass loadClass = 2;
+        ClassLoaded classLoaded = 3;
+        Finished finishedLoading = 4;
     }
+}
+
+
+message ConnectionRecieved {
+    bool ready = 1;
+    string id = 2;
 }
 
 message LoadClass {
