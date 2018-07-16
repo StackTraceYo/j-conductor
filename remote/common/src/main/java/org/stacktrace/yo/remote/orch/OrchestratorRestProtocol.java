@@ -2,6 +2,7 @@ package org.stacktrace.yo.remote.orch;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,11 +15,11 @@ public class OrchestratorRestProtocol {
         REGISTER("/register"),
         UNREGISTER("/unregister"),
         NOTIFY("/job/complete"),
-        JOB("/job/"),
-        DONE("/job/done"),
-        PENDING("/job/pending"),
-        JOB_DETAIL("/job/:job_id"),
-        JOB_RESULT("/job/:job_id/result");
+        JOBS("/jobs"),
+        DONE("/jobs/done"),
+        PENDING("/jobs/pending"),
+        JOB_DETAIL("/jobs/:job_id"),
+        JOB_RESULT("/jobs/:job_id/result");
 
         private String path;
 
@@ -35,6 +36,118 @@ public class OrchestratorRestProtocol {
         }
     }
 
+    public static final class JobResultMessage {
+        public static final class Response {
+            private String id;
+            private String worker;
+            private Object result;
+
+            public Response() {
+            }
+
+            public String getId() {
+                return id;
+            }
+
+            public Response setId(String id) {
+                this.id = id;
+                return this;
+            }
+
+            public String getWorker() {
+                return worker;
+            }
+
+            public Response setWorker(String worker) {
+                this.worker = worker;
+                return this;
+            }
+
+            public Object getResult() {
+                return result;
+            }
+
+            public Response setResult(Object result) {
+                this.result = result;
+                return this;
+            }
+        }
+    }
+
+    public static final class JobStatusMessage {
+
+        public static final class MultiJobResponse {
+            private List<JobStatusMessage.Response> pending = new ArrayList<>();
+            private List<JobStatusMessage.Response> done = new ArrayList<>();
+
+            public MultiJobResponse() {
+            }
+
+            public MultiJobResponse addPending(JobStatusMessage.Response response) {
+                pending.add(response);
+                return this;
+            }
+
+            public MultiJobResponse addDone(JobStatusMessage.Response response) {
+                done.add(response);
+                return this;
+            }
+
+            public List<Response> getPending() {
+                return pending;
+            }
+
+            public MultiJobResponse setPending(List<Response> pending) {
+                this.pending = pending;
+                return this;
+            }
+
+            public List<Response> getDone() {
+                return done;
+            }
+
+            public MultiJobResponse setDone(List<Response> done) {
+                this.done = done;
+                return this;
+            }
+        }
+
+        public static final class Response {
+            private String id;
+            private String status;
+            private String worker;
+
+            public Response() {
+            }
+
+            public String getId() {
+                return id;
+            }
+
+            public Response setId(String id) {
+                this.id = id;
+                return this;
+            }
+
+            public String getStatus() {
+                return status;
+            }
+
+            public Response setStatus(String status) {
+                this.status = status;
+                return this;
+            }
+
+            public String getWorker() {
+                return worker;
+            }
+
+            public Response setWorker(String worker) {
+                this.worker = worker;
+                return this;
+            }
+        }
+    }
 
     public static final class RegisterMessage {
 
