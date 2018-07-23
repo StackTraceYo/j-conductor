@@ -8,6 +8,7 @@ public class RLoaderRunner {
 
     public RLoaderRunner() {
         myServer = new ClassLoaderServer(8889);
+        myServer.start();
     }
 
     public static void main(String... args) {

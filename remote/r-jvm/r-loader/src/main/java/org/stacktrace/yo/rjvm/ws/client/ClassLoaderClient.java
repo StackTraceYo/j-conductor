@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
@@ -35,26 +36,26 @@ public class ClassLoaderClient extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
-        fireListener(listener -> listener.onMessage(message));
+        fireListener(listener -> listener.onMessage().accept(ByteBuffer.wrap(message.getBytes(StandardCharsets.UTF_8))));
     }
 
     @Override
     public void onMessage(ByteBuffer bytes) {
-        fireListener(listener -> listener.onMessage(bytes));
+        fireListener(listener -> listener.onMessage().accept(bytes));
     }
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
         myLogger.debug("[Classloader Client] Closing");
         isConnected.getAndSet(false);
-        fireListener(listener -> listener.onClose(reason));
+        fireListener(listener -> listener.onClose().accept(reason));
     }
 
     @Override
     public void onError(Exception ex) {
         myLogger.debug("[Classloader Client] Errored - Closing", ex);
         isConnected.getAndSet(false);
-        fireListener(listener -> listener.onError(ex));
+        fireListener(listener -> listener.onError().accept(ex));
     }
 
     private void fireListener(Consumer<Listener> consumer) {
@@ -67,12 +68,12 @@ public class ClassLoaderClient extends WebSocketClient {
 
         Consumer<Void> onOpen();
 
-        Consumer<String> onMessage(String message);
+//        Consumer<String> onMessage();
 
-        Consumer<ByteBuffer> onMessage(ByteBuffer bytes);
+        Consumer<ByteBuffer> onMessage();
 
-        Consumer<String> onClose(String reason);
+        Consumer<String> onClose();
 
-        Consumer<Exception> onError(Exception ex);
+        Consumer<Exception> onError();
     }
 }

@@ -6,6 +6,7 @@ import org.stacktrace.yo.proto.rloader.RLoader;
 import org.stacktrace.yo.rjvm.ws.client.ClassLoaderClient;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 
@@ -20,6 +21,7 @@ public class RemoteClassLoader extends ClassLoader implements ClassLoaderClient.
     public RemoteClassLoader(URI serverUri, ClassLoader parent) {
         super(parent);
         myClient = new ClassLoaderClient(serverUri, this);
+        myClient.connect();
     }
 
     @Override
@@ -27,25 +29,24 @@ public class RemoteClassLoader extends ClassLoader implements ClassLoaderClient.
         return aVoid -> myLogger.debug("[RemoteClassLoader] Opened");
     }
 
-    @Override
-    public Consumer<String> onMessage(String message) {
-        return null;
-    }
 
     @Override
-    public Consumer<ByteBuffer> onMessage(ByteBuffer bytes) {
+    public Consumer<ByteBuffer> onMessage() {
         return byteBuffer -> {
             try {
-                RLoader.RLoaderMessage.MessageCase messageCase = RLoader.RLoaderMessage
-                        .parseFrom(bytes)
-                        .getMessageCase();
+                RLoader.RLoaderMessage message = RLoader.RLoaderMessage
+                        .parseFrom(byteBuffer);
+                RLoader.RLoaderMessage.MessageCase messageCase = message.getMessageCase();
+                myLogger.debug(messageCase.toString());
                 switch (messageCase) {
                     case CONNECTED:
+                        RLoader.ConnectionRecieved connectionRecieved = message.getConnected();
+                        myLogger.debug(connectionRecieved.getId());
                     case CLASSLOADED:
 
                 }
             } catch (Exception e) {
-
+                myLogger.error("[RemoteClassLoader] Error: ", e);
             }
         };
     }
@@ -61,12 +62,17 @@ public class RemoteClassLoader extends ClassLoader implements ClassLoaderClient.
     }
 
     @Override
-    public Consumer<String> onClose(String reason) {
+    public Consumer<String> onClose() {
         return null;
     }
 
     @Override
-    public Consumer<Exception> onError(Exception ex) {
+    public Consumer<Exception> onError() {
         return null;
+    }
+
+    public static void main(String... args) throws URISyntaxException {
+        RemoteClassLoader x = new RemoteClassLoader(new URI("http://localhost:8889"));
+
     }
 }

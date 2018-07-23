@@ -42,6 +42,7 @@ public class ClassLoaderServer extends WebSocketServer {
                         .build()
                         .toByteArray()
         );
+        myLogger.debug("[ClassLoader Server] Sending Connection");
     }
 
     @Override
@@ -62,9 +63,13 @@ public class ClassLoaderServer extends WebSocketServer {
         try {
             RLoader.RLoaderMessage message = RLoader.RLoaderMessage
                     .parseFrom(buffer);
-            switch (message.getMessageCase()){
+            switch (message.getMessageCase()) {
                 case LOADCLASS:
                     RLoader.ClassLoaded classLoaded = myClassProvider.findClass(message.getLoadClass());
+                    conn.send(
+                            classLoaded
+                                    .toByteArray()
+                    );
                 case FINISHEDLOADING:
                 case MESSAGE_NOT_SET:
 
@@ -76,6 +81,7 @@ public class ClassLoaderServer extends WebSocketServer {
 
     @Override
     public void onError(WebSocket conn, Exception e) {
+        myLogger.error("[ClassLoader Server] Error", e);
 
     }
 }
