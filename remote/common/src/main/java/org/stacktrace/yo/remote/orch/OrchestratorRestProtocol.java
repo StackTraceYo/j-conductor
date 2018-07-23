@@ -19,7 +19,9 @@ public class OrchestratorRestProtocol {
         DONE("/jobs/done"),
         PENDING("/jobs/pending"),
         JOB_DETAIL("/jobs/:job_id"),
-        JOB_RESULT("/jobs/:job_id/result");
+        JOB_RESULT("/jobs/:job_id/result"),
+        HEALTH("/health"),
+        STATUS("/config");
 
         private String path;
 
