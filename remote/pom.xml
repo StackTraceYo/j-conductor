@@ -30,7 +30,6 @@
         <module>common</module>
         <module>orchestrator</module>
         <module>worker</module>
-        <module>r-jvm</module>
     </modules>
 
 </project>
