@@ -20,14 +20,14 @@ public class AsynchronousJobTest {
 
     @Test
     public void asynchronousJobCanBeRun() throws Exception {
-        AsynchronousJob<String, String> classUnderTest = new AsynchronousJob<>("test_id", params -> "Return " + params, "Parameter");
+        FutureWorker<String, String> classUnderTest = new FutureWorker<>("test_id", params -> "Return " + params, "Parameter");
         String result = classUnderTest.run().get();
         assertEquals("Return Parameter", result);
     }
 
     @Test
     public void asynchronousJobCanBeRunWithBlock() throws Exception {
-        AsynchronousJob<String, String> classUnderTest = new AsynchronousJob<>("test_id", params -> {
+        FutureWorker<String, String> classUnderTest = new FutureWorker<>("test_id", params -> {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -44,7 +44,7 @@ public class AsynchronousJobTest {
         List<String> list = new ArrayList<>();
         List<String> spyList = Mockito.spy(list);
 
-        AsynchronousJob<String, String> classUnderTest = new AsynchronousJob<>("test_id",
+        FutureWorker<String, String> classUnderTest = new FutureWorker<>("test_id",
                 params -> "Return " + params,
                 "Parameter",
                 new StageListenerBuilder<String>()
@@ -63,7 +63,7 @@ public class AsynchronousJobTest {
         List<String> list = new ArrayList<>();
         List<String> spyList = Mockito.spy(list);
 
-        AsynchronousJob<String, String> classUnderTest = new AsynchronousJob<>("test_id",
+        FutureWorker<String, String> classUnderTest = new FutureWorker<>("test_id",
                 params -> {
                     throw new RuntimeException("Error");
                 },
@@ -86,7 +86,7 @@ public class AsynchronousJobTest {
         List<String> list = new ArrayList<>();
         List<String> spyList = Mockito.spy(list);
 
-        AsynchronousJob<String, String> classUnderTest = new AsynchronousJob<>("test_id",
+        FutureWorker<String, String> classUnderTest = new FutureWorker<>("test_id",
                 new Job<String, String>() {
                     @Override
                     public String doWork(String params) {
@@ -124,7 +124,7 @@ public class AsynchronousJobTest {
         List<String> list = new ArrayList<>();
         List<String> spyList = Mockito.spy(list);
 
-        AsynchronousJob<String, String> classUnderTest = new AsynchronousJob<>("test_id",
+        FutureWorker<String, String> classUnderTest = new FutureWorker<>("test_id",
                 new Job<String, String>() {
                     @Override
                     public String doWork(String params) {
@@ -163,7 +163,7 @@ public class AsynchronousJobTest {
         List<String> list = new ArrayList<>();
         List<String> spyList = Mockito.spy(list);
 
-        AsynchronousJob<String, String> classUnderTest = new AsynchronousJob<>("test_id",
+        FutureWorker<String, String> classUnderTest = new FutureWorker<>("test_id",
                 new Job<String, String>() {
                     @Override
                     public String doWork(String params) {
@@ -201,7 +201,7 @@ public class AsynchronousJobTest {
         List<String> list = new ArrayList<>();
         List<String> spyList = Mockito.spy(list);
 
-        AsynchronousJob<String, String> classUnderTest = new AsynchronousJob<>("test_id",
+        FutureWorker<String, String> classUnderTest = new FutureWorker<>("test_id",
                 new Job<String, String>() {
                     @Override
                     public String doWork(String params) {
@@ -238,12 +238,12 @@ public class AsynchronousJobTest {
         List<String> list = new ArrayList<>();
         List<String> spyList = Mockito.spy(list);
 
-        AsynchronousJob<String, String> classUnderTest = new AsynchronousJob<>("test_id", params -> {
+        FutureWorker<String, String> classUnderTest = new FutureWorker<>("test_id", params -> {
             String result = Thread.currentThread().getName() + " " + params;
             spyList.add(result);
             return result;
         }, "Parameter");
-        AsynchronousJob<String, String> classUnderTest2 = new AsynchronousJob<>("test_id2", params -> {
+        FutureWorker<String, String> classUnderTest2 = new FutureWorker<>("test_id2", params -> {
             String result = Thread.currentThread().getName() + " " + params;
             spyList.add(result);
             return result;

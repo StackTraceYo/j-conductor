@@ -12,67 +12,46 @@ public abstract class Worker<T, V> {
 
     protected final T params;
     protected final String id;
-    protected V result;
-    protected boolean running;
-    protected boolean completed;
-    protected boolean errored;
-    protected boolean started;
-    protected Consumer<JobStage<V>> onComplete;
-    protected Consumer<Throwable> onError;
-    protected Consumer<JobStage<V>> onStart;
+    protected final StageListener<V> listener;
     protected final Job<T, V> job;
+    protected V result;
+    private JobExecutionStage status;
 
-    Worker(String id, Job<T, V> job, T params) {
-        this.params = params;
-        this.id = id;
-        this.job = job;
+    public Worker(String id, Job<T, V> job, T params) {
+        this(id, job, params, new StageListener.NoOpListener<>());
     }
 
-    Worker(String id, Job<T, V> job, T params, Consumer<JobStage<V>> onStart, Consumer<JobStage<V>> onComplete, Consumer<Throwable> onError) {
-        this(id, job, params);
-        this.onStart = onStart;
-        this.onComplete = onComplete;
-        this.onError = onError;
+    public Worker(String id, Job<T, V> job, T params, Consumer<JobStage<V>> onStart, Consumer<JobStage<V>> onComplete, Consumer<Throwable> onError) {
+        this(id, job, params, new StageListener.DefaultStageListener<>(onStart, onComplete, onError));
     }
 
     public Worker(String id, Work<T, V> work, T params) {
-        this.params = params;
-        this.id = id;
-        this.job = new AbstractJob<>(work);
+        this(id, new BasicJob<>(work), params);
     }
 
     public Worker(String id, Work<T, V> work, T params, StageListener<V> listener) {
-        this(id, new AbstractJob<>(work), params, listener.onStart(), listener.onComplete(), listener.onError());
+        this(id, new BasicJob<>(work), params, listener);
     }
 
-    Worker(String id, Job<T, V> job, T params, StageListener<V> listener) {
-        this(id, job, params, listener.onStart(), listener.onComplete(), listener.onError());
+    public Worker(String id, Job<T, V> job, T params, StageListener<V> listener) {
+        this.id = id;
+        this.job = job;
+        this.params = params;
+        this.listener = listener;
     }
 
     protected final void consumeStart() {
-        this.running = true;
-        this.started = true;
-        if (this.onStart != null) {
-            this.onStart.accept(JobExecutionStage.RUNNING.createStage(this.id));
-        }
+        this.status = JobExecutionStage.RUNNING;
+        this.listener.onStart().accept(this.status.createStage(this.id));
     }
 
     protected final void consumeComplete() {
-        this.completed = true;
-        this.running = false;
-        this.started = false;
-        if (this.onComplete != null) {
-            this.onComplete.accept(JobExecutionStage.COMPLETE.createStage(this.id, this.result));
-        }
+        this.status = JobExecutionStage.COMPLETE;
+        this.listener.onComplete().accept(this.status.createStage(this.id, this.result));
     }
 
     protected final void consumeError(Throwable e) {
-        this.errored = true;
-        this.completed = true;
-        this.running = false;
-        this.started = false;
-        if (this.onError != null) {
-            this.onError.accept(e);
-        }
+        this.status = JobExecutionStage.ERRORED;
+        this.listener.onError().accept(e);
     }
 }

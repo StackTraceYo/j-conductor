@@ -45,25 +45,7 @@ public final class StageListenerBuilder<V> {
     }
 
     public StageListener<V> build() {
-
-        return new StageListener<V>() {
-
-            @Override
-            public Consumer<JobStage<V>> onStart() {
-                return onStart;
-            }
-
-            @Override
-            public Consumer<JobStage<V>> onComplete() {
-                return onComplete;
-            }
-
-            @Override
-            public Consumer<Throwable> onError() {
-                return onError;
-            }
-        };
+        return new StageListener.DefaultStageListener<>(onStart, onComplete, onError);
     }
-
 
 }

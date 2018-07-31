@@ -16,14 +16,14 @@ public class SynchronousJobTest {
 
     @Test
     public void synchronousJobCanBeRun() {
-        SynchronousJob<String, String> classUnderTest = new SynchronousJob<>("test_id", params -> "Return " + params, "Parameter");
+        DefaultWorker<String, String> classUnderTest = new DefaultWorker<>("test_id", params -> "Return " + params, "Parameter");
         String result = classUnderTest.run();
         assertEquals("Return Parameter", result);
     }
 
     @Test
     public void synchronousJobCanBeRunWithBlock() {
-        SynchronousJob<String, String> classUnderTest = new SynchronousJob<>("test_id", params -> {
+        DefaultWorker<String, String> classUnderTest = new DefaultWorker<>("test_id", params -> {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -40,7 +40,7 @@ public class SynchronousJobTest {
         List<String> list = new ArrayList<>();
         List<String> spyList = Mockito.spy(list);
 
-        SynchronousJob<String, String> classUnderTest = new SynchronousJob<>("test_id",
+        DefaultWorker<String, String> classUnderTest = new DefaultWorker<>("test_id",
                 params -> "Return " + params,
                 "Parameter",
                 new StageListenerBuilder<String>()
@@ -59,7 +59,7 @@ public class SynchronousJobTest {
         List<String> list = new ArrayList<>();
         List<String> spyList = Mockito.spy(list);
 
-        SynchronousJob<String, String> classUnderTest = new SynchronousJob<>("test_id",
+        DefaultWorker<String, String> classUnderTest = new DefaultWorker<>("test_id",
                 params -> {
                     throw new RuntimeException("Error");
                 },
@@ -82,7 +82,7 @@ public class SynchronousJobTest {
         List<String> list = new ArrayList<>();
         List<String> spyList = Mockito.spy(list);
 
-        SynchronousJob<String, String> classUnderTest = new SynchronousJob<>("test_id",
+        DefaultWorker<String, String> classUnderTest = new DefaultWorker<>("test_id",
                 new Job<String, String>() {
                     @Override
                     public String doWork(String params) {
@@ -120,7 +120,7 @@ public class SynchronousJobTest {
         List<String> list = new ArrayList<>();
         List<String> spyList = Mockito.spy(list);
 
-        SynchronousJob<String, String> classUnderTest = new SynchronousJob<>("test_id",
+        DefaultWorker<String, String> classUnderTest = new DefaultWorker<>("test_id",
                 new Job<String, String>() {
                     @Override
                     public String doWork(String params) {
@@ -159,7 +159,7 @@ public class SynchronousJobTest {
         List<String> list = new ArrayList<>();
         List<String> spyList = Mockito.spy(list);
 
-        SynchronousJob<String, String> classUnderTest = new SynchronousJob<>("test_id",
+        DefaultWorker<String, String> classUnderTest = new DefaultWorker<>("test_id",
                 new Job<String, String>() {
                     @Override
                     public String doWork(String params) {
@@ -197,7 +197,7 @@ public class SynchronousJobTest {
         List<String> list = new ArrayList<>();
         List<String> spyList = Mockito.spy(list);
 
-        SynchronousJob<String, String> classUnderTest = new SynchronousJob<>("test_id",
+        DefaultWorker<String, String> classUnderTest = new DefaultWorker<>("test_id",
                 new Job<String, String>() {
                     @Override
                     public String doWork(String params) {

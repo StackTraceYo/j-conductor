@@ -8,7 +8,7 @@ import org.stacktrace.yo.jconductor.core.dispatch.store.ResultStore;
 import org.stacktrace.yo.jconductor.core.dispatch.store.ResultStoringDispatcher;
 import org.stacktrace.yo.jconductor.core.dispatch.work.CompletedWork;
 import org.stacktrace.yo.jconductor.core.dispatch.work.ScheduledWork;
-import org.stacktrace.yo.jconductor.core.execution.job.SynchronousJob;
+import org.stacktrace.yo.jconductor.core.execution.job.DefaultWorker;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListener;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListenerBuilder;
 import org.stacktrace.yo.jconductor.core.execution.work.Job;
@@ -85,7 +85,7 @@ public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDi
         ScheduledWork work = this.jobQueue.poll();
         if (work != null) {
             myLogger.debug("[ConsumerDispatcher] Worker {} - Job Found: {}", Thread.currentThread().getName(), work.getId());
-            SynchronousJob createdJob = createJob(work);
+            DefaultWorker createdJob = createJob(work);
             createdJob.run();
         } else {
             myLogger.debug("[ConsumerDispatcher] Nothing in Queue");
@@ -152,8 +152,8 @@ public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDi
     }
 
     @SuppressWarnings("unchecked")
-    private <T, V> SynchronousJob createJob(ScheduledWork<T, V> work) {
-        return new SynchronousJob(work.getId(), work.getJob(), work.getParams(),
+    private <T, V> DefaultWorker createJob(ScheduledWork<T, V> work) {
+        return new DefaultWorker(work.getId(), work.getJob(), work.getParams(),
                 new StageListenerBuilder<V>()
                         .bindListener(work.getListener())
                         .onStart(running -> {

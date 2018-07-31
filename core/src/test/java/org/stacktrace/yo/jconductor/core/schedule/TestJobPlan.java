@@ -3,6 +3,7 @@ package org.stacktrace.yo.jconductor.core.schedule;
 import org.stacktrace.yo.jconductor.core.dispatch.schedule.JobPlan;
 import org.stacktrace.yo.jconductor.core.execution.work.Job;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -26,6 +27,25 @@ public class TestJobPlan extends JobPlan<TestJobPlan.BasicTestJob, String, Strin
         @Override
         public void init(String params) {
             System.out.println("Params: " + params);
+        }
+    }
+
+    static class BasicMultiTestJob implements Job<List<String>, List<String>> {
+
+
+        @Override
+        public void postRun() {
+
+        }
+
+        @Override
+        public void init(List<String> params) {
+
+        }
+
+        @Override
+        public List<String> doWork(List<String> params) {
+            return null;
         }
     }
 

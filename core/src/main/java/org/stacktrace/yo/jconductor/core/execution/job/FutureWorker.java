@@ -8,21 +8,21 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
 
-public class AsynchronousJob<T, V> extends Worker<T, V> implements Executable<CompletableFuture<V>> {
+public class FutureWorker<T, V> extends Worker<T, V> implements Executable<CompletableFuture<V>> {
 
-    public AsynchronousJob(String id, Job<T, V> job, T params) {
+    public FutureWorker(String id, Job<T, V> job, T params) {
         super(id, job, params);
     }
 
-    public AsynchronousJob(String id, Job<T, V> job, T params, StageListener<V> listener) {
+    public FutureWorker(String id, Job<T, V> job, T params, StageListener<V> listener) {
         super(id, job, params, listener);
     }
 
-    public AsynchronousJob(String id, Work<T, V> work, T params) {
+    public FutureWorker(String id, Work<T, V> work, T params) {
         super(id, work, params);
     }
 
-    public AsynchronousJob(String id, Work<T, V> work, T params, StageListener<V> listener) {
+    public FutureWorker(String id, Work<T, V> work, T params, StageListener<V> listener) {
         super(id, work, params, listener);
     }
 

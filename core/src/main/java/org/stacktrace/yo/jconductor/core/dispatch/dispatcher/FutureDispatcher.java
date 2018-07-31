@@ -7,7 +7,7 @@ import org.stacktrace.yo.jconductor.core.dispatch.store.ResultStore;
 import org.stacktrace.yo.jconductor.core.dispatch.store.ResultStoringDispatcher;
 import org.stacktrace.yo.jconductor.core.dispatch.work.CompletedWork;
 import org.stacktrace.yo.jconductor.core.dispatch.work.ScheduledWork;
-import org.stacktrace.yo.jconductor.core.execution.job.AsynchronousJob;
+import org.stacktrace.yo.jconductor.core.execution.job.FutureWorker;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListener;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListenerBuilder;
 import org.stacktrace.yo.jconductor.core.execution.work.Job;
@@ -68,12 +68,12 @@ public class FutureDispatcher implements AsyncDispatcher, ResultStoringDispatche
         return run(schedule(scheduledWork, id));
     }
 
-    private <T, V> CompletableFuture<V> run(AsynchronousJob<T, V> asynchronousJob) {
+    private <T, V> CompletableFuture<V> run(FutureWorker<T, V> asynchronousJob) {
         myPendingCount.getAndIncrement();
         return asynchronousJob.run(myExecutorService);
     }
 
-    private <T, V> AsynchronousJob<T, V> schedule(ScheduledWork<T, V> scheduledWork, String id) {
+    private <T, V> FutureWorker<T, V> schedule(ScheduledWork<T, V> scheduledWork, String id) {
         LOGGER.debug("[FutureDispatcher] scheduling new job {}", id);
         return createAsyncJob(scheduledWork);
     }
@@ -89,8 +89,8 @@ public class FutureDispatcher implements AsyncDispatcher, ResultStoringDispatche
     }
 
     @SuppressWarnings("unchecked")
-    private <T, V> AsynchronousJob<T, V> createAsyncJob(ScheduledWork<T, V> work) {
-        return new AsynchronousJob<>(work.getId(), work.getJob(), work.getParams(),
+    private <T, V> FutureWorker<T, V> createAsyncJob(ScheduledWork<T, V> work) {
+        return new FutureWorker<>(work.getId(), work.getJob(), work.getParams(),
                 new StageListenerBuilder<V>()
                         .bindListener(work.getListener())
                         .onStart(running -> {
