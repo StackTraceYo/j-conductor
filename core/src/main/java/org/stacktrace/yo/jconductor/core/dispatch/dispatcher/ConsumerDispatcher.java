@@ -192,6 +192,44 @@ public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDi
         );
     }
 
+    @SuppressWarnings("unchecked")
+    private <T, V> DefaultWorker createMultiJob(ScheduledWork<T, V> work) {
+        return new DefaultWorker(work.getId(), work.getJob(), work.getParams(),
+                new StageListenerBuilder<V>()
+                        .bindListener(work.getListener())
+                        .onStart(running -> {
+                            myLogger.debug("[ConsumerDispatcher] Job Started: {}", work.getId());
+                        })
+                        .onComplete(
+                                completed -> {
+                                    myLogger.debug("[ConsumerDispatcher] Job Completed: {}", work.getId());
+                                    myResultStore.putResult(work.getId(),
+                                            new CompletedWork(
+                                                    completed.getStageResult(),
+                                                    work.getParams(),
+                                                    work.getJob().getClass().toGenericString(),
+                                                    completed.getId()
+                                            )
+                                    );
+                                    this.running.getAndDecrement();
+                                })
+                        .onError(
+                                error -> {
+                                    myLogger.error("[ConsumerDispatcher] Job Errored: {}", work.getId(), error);
+                                    myResultStore.putResult(work.getId(),
+                                            new CompletedWork(
+                                                    error,
+                                                    work.getParams(),
+                                                    work.getJob().getClass().toGenericString(),
+                                                    work.getId()
+                                            )
+                                    );
+                                    this.running.getAndDecrement();
+                                })
+                        .build()
+        );
+    }
+
     private EmittingQueue<ScheduledWork> createQueue() {
         return new EmittingQueue<>(
                 queue -> {

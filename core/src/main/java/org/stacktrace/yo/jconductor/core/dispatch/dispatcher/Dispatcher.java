@@ -13,5 +13,9 @@ public interface Dispatcher {
 
     <T, V> String schedule(Job<T, V> job, Supplier<T> params, StageListener<V> listener);
 
+    <T, V> String schedule(Job<T, V> job, Supplier<T> params);
+
+    <T, V> String schedule(Job<T, V> job, Supplier<T> params, StageListener<V> listener);
+
     boolean shutdown();
 }
