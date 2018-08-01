@@ -72,7 +72,7 @@ public class DispatchJobScheduler {
 
     private <JobType extends Job<Param, Result>, Param, Result> Runnable createJob(JobPlan<JobType, Param, Result> plan) {
         return () -> {
-            String jobId = myDispatcher.schedule(plan.job().get(), plan.jobParams().get(), createPlanListener(plan));
+            String jobId = myDispatcher.schedule(plan.job().get(), plan.jobParams(), createPlanListener(plan));
             plan.setExecutionId(jobId);
             myScheduledJobs.add(jobId);
             myJobPlans.put(jobId, plan);

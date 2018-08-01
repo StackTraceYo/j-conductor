@@ -12,14 +12,17 @@ import org.stacktrace.yo.jconductor.core.execution.job.DefaultWorker;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListener;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListenerBuilder;
 import org.stacktrace.yo.jconductor.core.execution.work.Job;
+import org.stacktrace.yo.jconductor.core.execution.work.MultiJob;
 import org.stacktrace.yo.jconductor.core.util.EmittingQueue;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDispatcher {
@@ -64,7 +67,7 @@ public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDi
                 });
     }
 
-    public <T, V> String schedule(Job<T, V> job, T params) {
+    public <T, V> String schedule(Job<T, V> job, Supplier<T> params) {
         String id = UUID.randomUUID().toString();
         ScheduledWork<T, V> scheduledWork = new ScheduledWork<>(job, params, id);
         myLogger.debug("[ConsumerDispatcher] scheduling new job {}", id);
@@ -73,7 +76,7 @@ public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDi
 
 
     @Override
-    public <T, V> String schedule(Job<T, V> job, T params, StageListener<V> listener) {
+    public <T, V> String schedule(Job<T, V> job, Supplier<T> params, StageListener<V> listener) {
         String id = UUID.randomUUID().toString();
         ScheduledWork<T, V> scheduledWork = new ScheduledWork<>(job, params, id, listener);
         myLogger.debug("[ConsumerDispatcher] scheduling new job {}", id);

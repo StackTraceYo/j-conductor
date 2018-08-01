@@ -3,6 +3,7 @@ package org.stacktrace.yo.jconductor.akka.core.actor
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
+
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.event.LoggingAdapter
 import akka.routing.RoundRobinPool
@@ -19,8 +20,8 @@ class DispatchActor(val myWorkerCount: Int, val myDispatcherName: String) extend
   override def receive: Receive = {
 
     case scheduleJob@ScheduleJob(work: WorkParams[Any, Any], id: String) =>
-      sender() ! Accepted(id)
-      schedule(scheduleJob, id)
+      myLogger.debug("Scheduling {}", id)
+      myWorkers.tell(scheduleJob, sender())
     case Rejected(work, id) =>
       schedule(ScheduleJob((work._1, work._2, work._3), id), id)
     case Accepted(id) =>

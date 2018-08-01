@@ -51,7 +51,7 @@ public class ConsumerDispatcherTest {
     @Test
     public void canScheduleAndRetrieve() {
         classToTest = new ConsumerDispatcher();
-        String id = classToTest.schedule(new TestJob(), "String");
+        String id = classToTest.schedule(new TestJob(), () -> "String");
         assertNotNull(id);
         classToTest.shutdown();
         CompletedWork result = classToTest.getResultStore().getResult(id).get();
@@ -64,11 +64,11 @@ public class ConsumerDispatcherTest {
     public void canScheduleMultipleAndRetrieve() {
         classToTest = new ConsumerDispatcher();
 
-        String id = classToTest.schedule(new TestJob(), "String");
-        String id2 = classToTest.schedule(new TestJob(), "String2");
-        String id3 = classToTest.schedule(new SlowTestJob(), "String3");
-        String id4 = classToTest.schedule(new TestJob(), "String4");
-        String id5 = classToTest.schedule(new SlowTestJob(), "String5");
+        String id = classToTest.schedule(new TestJob(), () -> "String");
+        String id2 = classToTest.schedule(new TestJob(), () -> "String2");
+        String id3 = classToTest.schedule(new SlowTestJob(), () -> "String3");
+        String id4 = classToTest.schedule(new TestJob(), () -> "String4");
+        String id5 = classToTest.schedule(new SlowTestJob(), () -> "String5");
         assertNotNull(id);
         assertNotNull(id2);
         assertNotNull(id3);
@@ -100,11 +100,11 @@ public class ConsumerDispatcherTest {
     public void canScheduleMultipleAndRetrieveWithConcurrency() {
         classToTest = new ConsumerDispatcher(3);
 
-        String id = classToTest.schedule(new TestJob(), "String");
-        String id2 = classToTest.schedule(new TestJob(), "String2");
-        String id3 = classToTest.schedule(new SlowTestJob(), "String3");
-        String id4 = classToTest.schedule(new TestJob(), "String4");
-        String id5 = classToTest.schedule(new SlowTestJob(), "String5");
+        String id = classToTest.schedule(new TestJob(), () -> "String");
+        String id2 = classToTest.schedule(new TestJob(), () -> "String2");
+        String id3 = classToTest.schedule(new SlowTestJob(), () -> "String3");
+        String id4 = classToTest.schedule(new TestJob(), () -> "String4");
+        String id5 = classToTest.schedule(new SlowTestJob(), () -> "String5");
 
         assertNotNull(id);
         assertNotNull(id2);

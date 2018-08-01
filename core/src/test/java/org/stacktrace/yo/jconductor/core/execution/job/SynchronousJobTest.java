@@ -16,7 +16,7 @@ public class SynchronousJobTest {
 
     @Test
     public void synchronousJobCanBeRun() {
-        DefaultWorker<String, String> classUnderTest = new DefaultWorker<>("test_id", params -> "Return " + params, "Parameter");
+        DefaultWorker<String, String> classUnderTest = new DefaultWorker<>("test_id", params -> "Return " + params, () -> "Parameter");
         String result = classUnderTest.run();
         assertEquals("Return Parameter", result);
     }
@@ -30,7 +30,7 @@ public class SynchronousJobTest {
                 throw new RuntimeException("Errored");
             }
             return "Return " + params;
-        }, "Parameter");
+        }, () -> "Parameter");
         String result = classUnderTest.run();
         assertEquals("Return Parameter", result);
     }
@@ -42,7 +42,7 @@ public class SynchronousJobTest {
 
         DefaultWorker<String, String> classUnderTest = new DefaultWorker<>("test_id",
                 params -> "Return " + params,
-                "Parameter",
+                () -> "Parameter",
                 new StageListenerBuilder<String>()
                         .onComplete(
                                 onComplete -> spyList.add(onComplete.getStageResult())
@@ -63,7 +63,7 @@ public class SynchronousJobTest {
                 params -> {
                     throw new RuntimeException("Error");
                 },
-                "Parameter",
+                () -> "Parameter",
                 new StageListenerBuilder<String>()
                         .onComplete(
                                 onComplete -> spyList.add("Complete Called"))
@@ -99,7 +99,7 @@ public class SynchronousJobTest {
 
                     }
                 },
-                "Parameter",
+                () -> "Parameter",
                 new StageListenerBuilder<String>()
                         .onStart(onStart -> spyList.add(onStart.getId()))
                         .onComplete(onComplete -> spyList.add(onComplete.getStageResult()))
@@ -137,7 +137,7 @@ public class SynchronousJobTest {
                         spyList.add(params);
                     }
                 },
-                "Parameter",
+                () -> "Parameter",
                 new StageListenerBuilder<String>()
                         .onStart(onStart -> spyList.add(onStart.getId()))
                         .onComplete(onComplete -> spyList.add(onComplete.getStageResult()))
@@ -175,7 +175,7 @@ public class SynchronousJobTest {
                     public void init(String params) {
                     }
                 },
-                "Parameter",
+                () -> "Parameter",
                 new StageListenerBuilder<String>()
                         .onStart(onStart -> spyList.add(onStart.getId()))
                         .onComplete(onComplete -> spyList.add(onComplete.getStageResult()))
@@ -213,7 +213,7 @@ public class SynchronousJobTest {
                     public void init(String params) {
                     }
                 },
-                "Parameter",
+                () -> "Parameter",
                 new StageListenerBuilder<String>()
                         .onStart(onStart -> spyList.add(onStart.getId()))
                         .onComplete(onComplete -> spyList.add(onComplete.getStageResult()))

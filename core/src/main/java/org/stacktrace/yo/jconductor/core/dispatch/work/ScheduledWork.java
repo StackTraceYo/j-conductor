@@ -4,23 +4,25 @@ import org.stacktrace.yo.jconductor.core.execution.stage.JobStage;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListener;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListenerBuilder;
 import org.stacktrace.yo.jconductor.core.execution.work.Job;
+import org.stacktrace.yo.jconductor.core.util.LazyLoading;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class ScheduledWork<T, V> {
 
     private final Job<T, V> job;
-    private final T params;
+    private final LazyLoading<T> params;
     private final String id;
     private StageListener<V> stageListener;
 
-    public ScheduledWork(Job<T, V> job, T params, String id) {
+    public ScheduledWork(Job<T, V> job, Supplier<T> params, String id) {
         this.job = job;
-        this.params = params;
+        this.params = LazyLoading.lazy(params);
         this.id = id;
     }
 
-    public ScheduledWork(Job<T, V> job, T params, String id, Consumer<JobStage<V>> onComplete) {
+    public ScheduledWork(Job<T, V> job, Supplier<T> params, String id, Consumer<JobStage<V>> onComplete) {
         this(job, params, id);
         this.stageListener = new StageListenerBuilder<V>()
                 .onComplete(onComplete)
@@ -28,7 +30,7 @@ public class ScheduledWork<T, V> {
 
     }
 
-    public ScheduledWork(Job<T, V> job, T params, String id, Consumer<JobStage<V>> onComplete, Consumer<Throwable> onError) {
+    public ScheduledWork(Job<T, V> job, Supplier<T> params, String id, Consumer<JobStage<V>> onComplete, Consumer<Throwable> onError) {
         this(job, params, id);
         this.stageListener = new StageListenerBuilder<V>()
                 .onComplete(onComplete)
@@ -37,7 +39,7 @@ public class ScheduledWork<T, V> {
 
     }
 
-    public ScheduledWork(Job<T, V> job, T params, String id, Consumer<JobStage<V>> onStart, Consumer<JobStage<V>> onComplete, Consumer<Throwable> onError) {
+    public ScheduledWork(Job<T, V> job, Supplier<T> params, String id, Consumer<JobStage<V>> onStart, Consumer<JobStage<V>> onComplete, Consumer<Throwable> onError) {
         this(job, params, id);
         this.stageListener = new StageListenerBuilder<V>()
                 .onStart(onStart)
@@ -46,7 +48,7 @@ public class ScheduledWork<T, V> {
                 .build();
     }
 
-    public ScheduledWork(Job<T, V> job, T params, String id, StageListener<V> listener) {
+    public ScheduledWork(Job<T, V> job, Supplier<T> params, String id, StageListener<V> listener) {
         this(job, params, id);
         this.stageListener = listener;
     }
@@ -60,7 +62,7 @@ public class ScheduledWork<T, V> {
         return job;
     }
 
-    public T getParams() {
+    public Supplier<T> getParams() {
         return params;
     }
 

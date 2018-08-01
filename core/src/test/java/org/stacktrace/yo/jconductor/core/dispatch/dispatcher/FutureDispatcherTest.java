@@ -64,7 +64,7 @@ public class FutureDispatcherTest {
     @Test
     public void canScheduleAndRetrieve() {
         classToTest = new FutureDispatcher();
-        String id = classToTest.schedule(new TestJob(), "String");
+        String id = classToTest.schedule(new TestJob(), () -> "String");
         assertNotNull(id);
         classToTest.shutdown();
         CompletedWork result = classToTest.getResultStore().getResult(id).get();
@@ -75,7 +75,7 @@ public class FutureDispatcherTest {
     @Test
     public void canScheduleAndRetrieveFuture() {
         classToTest = new FutureDispatcher();
-        String result = classToTest.scheduleAsync(new TestJob(), "String").join();
+        String result = classToTest.scheduleAsync(new TestJob(), () -> "String").join();
         assertEquals(result, "Return String");
     }
 
@@ -84,11 +84,11 @@ public class FutureDispatcherTest {
     public void canScheduleMultipleAndRetrieve() {
         classToTest = new FutureDispatcher();
         List<CompletableFuture<String>> futures = Lists.newArrayList(
-                classToTest.scheduleAsync(new TestJob(), "String"),
-                classToTest.scheduleAsync(new TestJob(), "String2"),
-                classToTest.scheduleAsync(new SlowTestJob(2000), "String3"),
-                classToTest.scheduleAsync(new TestJob(), "String4"),
-                classToTest.scheduleAsync(new SlowTestJob(2000), "String5")
+                classToTest.scheduleAsync(new TestJob(), () -> "String"),
+                classToTest.scheduleAsync(new TestJob(), () -> "String2"),
+                classToTest.scheduleAsync(new SlowTestJob(2000), () -> "String3"),
+                classToTest.scheduleAsync(new TestJob(), () -> "String4"),
+                classToTest.scheduleAsync(new SlowTestJob(2000), () -> "String5")
         );
 
         List<String> results = Futures.ofAll(futures)
@@ -105,11 +105,11 @@ public class FutureDispatcherTest {
     public void canScheduleMultipleAndRetrieveConcurrent() {
         classToTest = new FutureDispatcher(5);
         List<CompletableFuture<String>> futures = Lists.newArrayList(
-                classToTest.scheduleAsync(new TestJob(), "String"),
-                classToTest.scheduleAsync(new TestJob(), "String2"),
-                classToTest.scheduleAsync(new SlowTestJob(2000), "String3"),
-                classToTest.scheduleAsync(new TestJob(), "String4"),
-                classToTest.scheduleAsync(new SlowTestJob(2000), "String5")
+                classToTest.scheduleAsync(new TestJob(), () -> "String"),
+                classToTest.scheduleAsync(new TestJob(), () -> "String2"),
+                classToTest.scheduleAsync(new SlowTestJob(2000), () -> "String3"),
+                classToTest.scheduleAsync(new TestJob(), () -> "String4"),
+                classToTest.scheduleAsync(new SlowTestJob(2000), () -> "String5")
         );
 
         List<String> results = Futures.ofAll(futures)
@@ -127,27 +127,27 @@ public class FutureDispatcherTest {
         classToTest = new FutureDispatcher(5);
         List<String> results = Lists.newArrayList();
         List<CompletableFuture<String>> futures = Lists.newArrayList(
-                classToTest.scheduleAsync(new SlowTestJob(3000), "String")
+                classToTest.scheduleAsync(new SlowTestJob(3000), () -> "String")
                         .thenApply(s -> {
                             results.add(s);
                             return s;
                         }),
-                classToTest.scheduleAsync(new TestJob(), "String2")
+                classToTest.scheduleAsync(new TestJob(), () -> "String2")
                         .thenApply(s -> {
                             results.add(s);
                             return s;
                         }),
-                classToTest.scheduleAsync(new SlowTestJob(1000), "String3")
+                classToTest.scheduleAsync(new SlowTestJob(1000), () -> "String3")
                         .thenApply(s -> {
                             results.add(s);
                             return s;
                         }),
-                classToTest.scheduleAsync(new TestJob(), "String4")
+                classToTest.scheduleAsync(new TestJob(), () -> "String4")
                         .thenApply(s -> {
                             results.add(s);
                             return s;
                         }),
-                classToTest.scheduleAsync(new SlowTestJob(2000), "String5")
+                classToTest.scheduleAsync(new SlowTestJob(2000), () -> "String5")
                         .thenApply(s -> {
                             results.add(s);
                             return s;
@@ -169,11 +169,11 @@ public class FutureDispatcherTest {
     public void canScheduleMultipleAndRetrieveWithConcurrency() {
         classToTest = new FutureDispatcher(3);
 
-        String id = classToTest.schedule(new TestJob(), "String");
-        String id2 = classToTest.schedule(new TestJob(), "String2");
-        String id3 = classToTest.schedule(new SlowTestJob(2000), "String3");
-        String id4 = classToTest.schedule(new TestJob(), "String4");
-        String id5 = classToTest.schedule(new SlowTestJob(2000), "String5");
+        String id = classToTest.schedule(new TestJob(), () -> "String");
+        String id2 = classToTest.schedule(new TestJob(), () -> "String2");
+        String id3 = classToTest.schedule(new SlowTestJob(2000), () -> "String3");
+        String id4 = classToTest.schedule(new TestJob(), () -> "String4");
+        String id5 = classToTest.schedule(new SlowTestJob(2000), () -> "String5");
 
         assertNotNull(id);
         assertNotNull(id2);

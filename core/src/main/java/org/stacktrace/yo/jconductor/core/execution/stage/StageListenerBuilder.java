@@ -45,7 +45,12 @@ public final class StageListenerBuilder<V> {
     }
 
     public StageListener<V> build() {
-        return new StageListener.DefaultStageListener<>(onStart, onComplete, onError);
+        return new StageListener.DefaultStageListener<>(defaultNull(onStart), defaultNull(onComplete), defaultNull(onError));
+    }
+
+    private static <V> Consumer<V> defaultNull(Consumer<V> consumer) {
+        return consumer == null ? v -> {
+        } : consumer;
     }
 
 }

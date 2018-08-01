@@ -59,9 +59,9 @@ public class ObservableJob<T, V> extends Worker<T, V> implements Executable<Obse
     private BiConsumer<? super V, ? super Throwable> finish(ObservableEmitter<JobStage> subscriber) {
         return (v, throwable) -> {
             if (throwable != null) {
-                this.errored = true;
+                this.status = JobExecutionStage.ERRORED;
                 subscriber.onError(throwable);
-                subscriber.onNext(JobExecutionStage.ERRORED.createStage(this.id, throwable));
+                subscriber.onNext(this.status.createStage(this.id, throwable));
             } else {
                 this.job.postRun();
                 subscriber.onNext(JobExecutionStage.COMPLETE.createStage(this.id, result));

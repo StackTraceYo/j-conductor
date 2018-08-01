@@ -18,6 +18,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 public class FutureDispatcher implements AsyncDispatcher, ResultStoringDispatcher {
 
@@ -39,7 +40,7 @@ public class FutureDispatcher implements AsyncDispatcher, ResultStoringDispatche
         this(1);
     }
 
-    public <T, V> String schedule(Job<T, V> job, T params) {
+    public <T, V> String schedule(Job<T, V> job, Supplier<T> params) {
         String id = UUID.randomUUID().toString();
         ScheduledWork<T, V> scheduledWork = new ScheduledWork<>(job, params, id);
         run(schedule(scheduledWork, id));
@@ -47,7 +48,7 @@ public class FutureDispatcher implements AsyncDispatcher, ResultStoringDispatche
     }
 
     @Override
-    public <T, V> String schedule(Job<T, V> job, T params, StageListener<V> listener) {
+    public <T, V> String schedule(Job<T, V> job, Supplier<T> params, StageListener<V> listener) {
         String id = UUID.randomUUID().toString();
         ScheduledWork<T, V> scheduledWork = new ScheduledWork<>(job, params, id, listener);
         run(schedule(scheduledWork, id));
@@ -55,14 +56,14 @@ public class FutureDispatcher implements AsyncDispatcher, ResultStoringDispatche
     }
 
     @Override
-    public <T, V> CompletableFuture<V> scheduleAsync(Job<T, V> job, T params) {
+    public <T, V> CompletableFuture<V> scheduleAsync(Job<T, V> job, Supplier<T> params) {
         String id = UUID.randomUUID().toString();
         ScheduledWork<T, V> scheduledWork = new ScheduledWork<>(job, params, id);
         return run(schedule(scheduledWork, id));
     }
 
     @Override
-    public <T, V> CompletableFuture<V> scheduleAsync(Job<T, V> job, T params, StageListener<V> listener) {
+    public <T, V> CompletableFuture<V> scheduleAsync(Job<T, V> job, Supplier<T> params, StageListener<V> listener) {
         String id = UUID.randomUUID().toString();
         ScheduledWork<T, V> scheduledWork = new ScheduledWork<>(job, params, id, listener);
         return run(schedule(scheduledWork, id));

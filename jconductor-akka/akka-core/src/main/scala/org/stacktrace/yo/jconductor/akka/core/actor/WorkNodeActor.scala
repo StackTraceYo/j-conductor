@@ -17,6 +17,7 @@ class WorkNodeActor(myDispatcher: ActorRef, maxChildren: Integer = 1) extends Ac
     case scheduleJob@ScheduleJob(jobParams: WorkParams[Any, Any], id: String) =>
       toggleToWorking()
       sender() ! Accepted(id)
+      myDispatcher ! Accepted(id)
       val worker = context.actorOf(WorkNodeActor.workerProp(self, jobParams, id))
       myChildrenCount.getAndIncrement()
       worker ! Start()

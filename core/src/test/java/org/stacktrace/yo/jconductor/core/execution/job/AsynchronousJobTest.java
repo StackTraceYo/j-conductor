@@ -20,7 +20,7 @@ public class AsynchronousJobTest {
 
     @Test
     public void asynchronousJobCanBeRun() throws Exception {
-        FutureWorker<String, String> classUnderTest = new FutureWorker<>("test_id", params -> "Return " + params, "Parameter");
+        FutureWorker<String, String> classUnderTest = new FutureWorker<>("test_id", params -> "Return " + params, () -> "Parameter");
         String result = classUnderTest.run().get();
         assertEquals("Return Parameter", result);
     }
@@ -34,7 +34,8 @@ public class AsynchronousJobTest {
                 throw new RuntimeException("Errored");
             }
             return "Return " + params;
-        }, "Parameter");
+        },
+                () -> "Parameter");
         String result = classUnderTest.run().get();
         assertEquals("Return Parameter", result);
     }
@@ -46,7 +47,7 @@ public class AsynchronousJobTest {
 
         FutureWorker<String, String> classUnderTest = new FutureWorker<>("test_id",
                 params -> "Return " + params,
-                "Parameter",
+                () -> "Parameter",
                 new StageListenerBuilder<String>()
                         .onComplete(
                                 onComplete -> spyList.add(onComplete.getStageResult())
@@ -67,7 +68,7 @@ public class AsynchronousJobTest {
                 params -> {
                     throw new RuntimeException("Error");
                 },
-                "Parameter",
+                () -> "Parameter",
                 new StageListenerBuilder<String>()
                         .onComplete(
                                 onComplete -> spyList.add("Complete Called"))
@@ -103,7 +104,7 @@ public class AsynchronousJobTest {
 
                     }
                 },
-                "Parameter",
+                () -> "Parameter",
                 new StageListenerBuilder<String>()
                         .onStart(onStart -> spyList.add(onStart.getId()))
                         .onComplete(onComplete -> spyList.add(onComplete.getStageResult()))
@@ -141,7 +142,7 @@ public class AsynchronousJobTest {
                         spyList.add(params);
                     }
                 },
-                "Parameter",
+                () -> "Parameter",
                 new StageListenerBuilder<String>()
                         .onStart(onStart -> spyList.add(onStart.getId()))
                         .onComplete(onComplete -> spyList.add(onComplete.getStageResult()))
@@ -179,7 +180,7 @@ public class AsynchronousJobTest {
                     public void init(String params) {
                     }
                 },
-                "Parameter",
+                () -> "Parameter",
                 new StageListenerBuilder<String>()
                         .onStart(onStart -> spyList.add(onStart.getId()))
                         .onComplete(onComplete -> spyList.add(onComplete.getStageResult()))
@@ -217,7 +218,7 @@ public class AsynchronousJobTest {
                     public void init(String params) {
                     }
                 },
-                "Parameter",
+                () -> "Parameter",
                 new StageListenerBuilder<String>()
                         .onStart(onStart -> spyList.add(onStart.getId()))
                         .onComplete(onComplete -> spyList.add(onComplete.getStageResult()))
@@ -242,12 +243,12 @@ public class AsynchronousJobTest {
             String result = Thread.currentThread().getName() + " " + params;
             spyList.add(result);
             return result;
-        }, "Parameter");
+        }, () -> "Parameter");
         FutureWorker<String, String> classUnderTest2 = new FutureWorker<>("test_id2", params -> {
             String result = Thread.currentThread().getName() + " " + params;
             spyList.add(result);
             return result;
-        }, "Parameter2");
+        }, () -> "Parameter");
         CompletableFuture.allOf(new CompletableFuture[]{classUnderTest.run(executorService), classUnderTest2.run(executorService)})
                 .join();
         assertEquals(2, spyList.size());

@@ -7,22 +7,23 @@ import org.stacktrace.yo.jconductor.core.execution.work.Work;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 public class FutureWorker<T, V> extends Worker<T, V> implements Executable<CompletableFuture<V>> {
 
-    public FutureWorker(String id, Job<T, V> job, T params) {
+    public FutureWorker(String id, Job<T, V> job, Supplier<T> params) {
         super(id, job, params);
     }
 
-    public FutureWorker(String id, Job<T, V> job, T params, StageListener<V> listener) {
+    public FutureWorker(String id, Job<T, V> job, Supplier<T> params, StageListener<V> listener) {
         super(id, job, params, listener);
     }
 
-    public FutureWorker(String id, Work<T, V> work, T params) {
+    public FutureWorker(String id, Work<T, V> work, Supplier<T> params) {
         super(id, work, params);
     }
 
-    public FutureWorker(String id, Work<T, V> work, T params, StageListener<V> listener) {
+    public FutureWorker(String id, Work<T, V> work, Supplier<T> params, StageListener<V> listener) {
         super(id, work, params, listener);
     }
 
@@ -53,17 +54,17 @@ public class FutureWorker<T, V> extends Worker<T, V> implements Executable<Compl
 
     private CompletableFuture<V> supplyFuture() {
         return CompletableFuture.supplyAsync(() -> {
-            job.init(params);
+            job.init(params.get());
             this.consumeStart();
-            return this.job.doWork(this.params);
+            return this.job.doWork(this.params.get());
         });
     }
 
     private CompletableFuture<V> supplyFuture(Executor e) {
         return CompletableFuture.supplyAsync(() -> {
-            job.init(params);
+            job.init(params.get());
             this.consumeStart();
-            return this.job.doWork(this.params);
+            return this.job.doWork(this.params.get());
         }, e);
     }
 }
