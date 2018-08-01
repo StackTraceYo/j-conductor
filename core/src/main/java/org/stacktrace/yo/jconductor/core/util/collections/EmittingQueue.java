@@ -1,4 +1,4 @@
-package org.stacktrace.yo.jconductor.core.util;
+package org.stacktrace.yo.jconductor.core.util.collections;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;

@@ -1,4 +1,4 @@
-package org.stacktrace.yo.jconductor.core.util;
+package org.stacktrace.yo.jconductor.core.util.supplier;
 
 import java.util.function.Supplier;
 

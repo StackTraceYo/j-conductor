@@ -5,7 +5,7 @@ import org.stacktrace.yo.jconductor.core.execution.stage.JobStage;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListener;
 import org.stacktrace.yo.jconductor.core.execution.work.Job;
 import org.stacktrace.yo.jconductor.core.execution.work.Work;
-import org.stacktrace.yo.jconductor.core.util.LazyLoading;
+import org.stacktrace.yo.jconductor.core.util.supplier.LazyLoading;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;

@@ -12,10 +12,9 @@ import org.stacktrace.yo.jconductor.core.execution.job.DefaultWorker;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListener;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListenerBuilder;
 import org.stacktrace.yo.jconductor.core.execution.work.Job;
-import org.stacktrace.yo.jconductor.core.execution.work.MultiJob;
-import org.stacktrace.yo.jconductor.core.util.EmittingQueue;
+import org.stacktrace.yo.jconductor.core.util.collections.EmittingQueue;
+import org.stacktrace.yo.jconductor.core.util.supplier.MultiSupplier;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -81,6 +80,16 @@ public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDi
         ScheduledWork<T, V> scheduledWork = new ScheduledWork<>(job, params, id, listener);
         myLogger.debug("[ConsumerDispatcher] scheduling new job {}", id);
         return jobQueue.offer(scheduledWork) ? id : "Unable To Queue";
+    }
+
+    @Override
+    public <T, V> String schedule(Job<T, V> job, MultiSupplier<T> params) {
+        return null;
+    }
+
+    @Override
+    public <T, V> String schedule(Job<T, V> job, MultiSupplier<T> params, StageListener<V> listener) {
+        return null;
     }
 
     @SuppressWarnings("unchecked")
@@ -156,44 +165,6 @@ public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDi
 
     @SuppressWarnings("unchecked")
     private <T, V> DefaultWorker createJob(ScheduledWork<T, V> work) {
-        return new DefaultWorker(work.getId(), work.getJob(), work.getParams(),
-                new StageListenerBuilder<V>()
-                        .bindListener(work.getListener())
-                        .onStart(running -> {
-                            myLogger.debug("[ConsumerDispatcher] Job Started: {}", work.getId());
-                        })
-                        .onComplete(
-                                completed -> {
-                                    myLogger.debug("[ConsumerDispatcher] Job Completed: {}", work.getId());
-                                    myResultStore.putResult(work.getId(),
-                                            new CompletedWork(
-                                                    completed.getStageResult(),
-                                                    work.getParams(),
-                                                    work.getJob().getClass().toGenericString(),
-                                                    completed.getId()
-                                            )
-                                    );
-                                    this.running.getAndDecrement();
-                                })
-                        .onError(
-                                error -> {
-                                    myLogger.error("[ConsumerDispatcher] Job Errored: {}", work.getId(), error);
-                                    myResultStore.putResult(work.getId(),
-                                            new CompletedWork(
-                                                    error,
-                                                    work.getParams(),
-                                                    work.getJob().getClass().toGenericString(),
-                                                    work.getId()
-                                            )
-                                    );
-                                    this.running.getAndDecrement();
-                                })
-                        .build()
-        );
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T, V> DefaultWorker createMultiJob(ScheduledWork<T, V> work) {
         return new DefaultWorker(work.getId(), work.getJob(), work.getParams(),
                 new StageListenerBuilder<V>()
                         .bindListener(work.getListener())
