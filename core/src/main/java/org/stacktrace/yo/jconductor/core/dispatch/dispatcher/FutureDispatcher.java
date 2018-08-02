@@ -11,6 +11,7 @@ import org.stacktrace.yo.jconductor.core.execution.job.FutureWorker;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListener;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListenerBuilder;
 import org.stacktrace.yo.jconductor.core.execution.work.Job;
+import org.stacktrace.yo.jconductor.core.util.supplier.MultiSupplier;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -53,6 +54,26 @@ public class FutureDispatcher implements AsyncDispatcher, ResultStoringDispatche
         ScheduledWork<T, V> scheduledWork = new ScheduledWork<>(job, params, id, listener);
         run(schedule(scheduledWork, id));
         return id;
+    }
+
+    @Override
+    public <T, V> String schedule(Job<T, V> job, MultiSupplier<T> params) {
+        return null;
+    }
+
+    @Override
+    public <T, V> String schedule(Job<T, V> job, MultiSupplier<T> params, StageListener<V> listener) {
+        return null;
+    }
+
+    @Override
+    public <T, V> CompletableFuture<V> scheduleAsync(Job<T, V> job, MultiSupplier<T> params) {
+        return null;
+    }
+
+    @Override
+    public <T, V> CompletableFuture<V> scheduleAsync(Job<T, V> job, MultiSupplier<T> params, StageListener<V> listener) {
+        return null;
     }
 
     @Override
