@@ -6,7 +6,7 @@ public interface StageListener<V> {
 
     Consumer<JobStage<V>> onStart();
 
-    Consumer<JobStage<V>> onComplete();
+    Consumer<CompletedJobStage<V>> onComplete();
 
     Consumer<Throwable> onError();
 
@@ -14,10 +14,10 @@ public interface StageListener<V> {
     class DefaultStageListener<V> implements StageListener<V> {
 
         private final Consumer<JobStage<V>> onStart;
-        private final Consumer<JobStage<V>> onComplete;
+        private final Consumer<CompletedJobStage<V>> onComplete;
         private final Consumer<Throwable> onError;
 
-        public DefaultStageListener(Consumer<JobStage<V>> onStart, Consumer<JobStage<V>> onComplete, Consumer<Throwable> onError) {
+        public DefaultStageListener(Consumer<JobStage<V>> onStart, Consumer<CompletedJobStage<V>> onComplete, Consumer<Throwable> onError) {
             this.onStart = onStart;
             this.onComplete = onComplete;
             this.onError = onError;
@@ -29,7 +29,7 @@ public interface StageListener<V> {
         }
 
         @Override
-        public Consumer<JobStage<V>> onComplete() {
+        public Consumer<CompletedJobStage<V>> onComplete() {
             return onComplete;
         }
 
@@ -49,7 +49,7 @@ public interface StageListener<V> {
         }
 
         @Override
-        public Consumer<JobStage<V>> onComplete() {
+        public Consumer<CompletedJobStage<V>> onComplete() {
             return vJobStage -> {
             };
         }

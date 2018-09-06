@@ -4,8 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.stacktrace.yo.jconductor.core.dispatch.store.InMemoryResultStore;
 import org.stacktrace.yo.jconductor.core.dispatch.store.ResultStore;
-import org.stacktrace.yo.jconductor.core.dispatch.store.ResultStoringDispatcher;
-import org.stacktrace.yo.jconductor.core.dispatch.work.CompletedWork;
 import org.stacktrace.yo.jconductor.core.dispatch.work.ScheduledWork;
 import org.stacktrace.yo.jconductor.core.execution.job.FutureWorker;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListener;
@@ -13,7 +11,6 @@ import org.stacktrace.yo.jconductor.core.execution.stage.StageListenerBuilder;
 import org.stacktrace.yo.jconductor.core.execution.work.Job;
 import org.stacktrace.yo.jconductor.core.util.supplier.MultiSupplier;
 
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -21,7 +18,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-public class FutureDispatcher implements AsyncDispatcher, ResultStoringDispatcher {
+public class FutureDispatcher implements AsyncDispatcher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FutureDispatcher.class.getSimpleName());
 
@@ -100,53 +97,31 @@ public class FutureDispatcher implements AsyncDispatcher, ResultStoringDispatche
         return createAsyncJob(scheduledWork);
     }
 
-    @Override
-    public Optional<CompletedWork> fetch(String id) {
-        return myResultStore.getResult(id);
-    }
-
-    @Override
-    public ResultStore getResultStore() {
-        return myResultStore;
-    }
-
     @SuppressWarnings("unchecked")
     private <T, V> FutureWorker<T, V> createAsyncJob(ScheduledWork<T, V> work) {
         return new FutureWorker<>(work.getId(), work.getJob(), work.getParams(),
                 new StageListenerBuilder<V>()
-                        .bindListener(work.getListener())
                         .onStart(running -> {
                             LOGGER.debug("[FutureDispatcher] Job Started: {}", work.getId());
                             myPendingCount.getAndDecrement();
                             myRunningCount.getAndIncrement();
                         })
+                        .andThen(work.onStart())
+                        .next()
                         .onComplete(
                                 completed -> {
                                     LOGGER.debug("[FutureDispatcher] Job Completed: {}", work.getId());
-                                    myResultStore.putResult(work.getId(),
-                                            new CompletedWork(
-                                                    completed.getStageResult(),
-                                                    work.getParams(),
-                                                    work.getJob().getClass().toGenericString(),
-                                                    completed.getId()
-                                            )
-                                    );
                                     myRunningCount.getAndDecrement();
                                 })
+                        .andThen(work.onComplete())
+                        .next()
                         .onError(
                                 error -> {
                                     LOGGER.error("[FutureDispatcher] Job Errored: {}", work.getId(), error);
-                                    myResultStore.putResult(work.getId(),
-                                            new CompletedWork(
-                                                    error,
-                                                    work.getParams(),
-                                                    work.getJob().getClass().toGenericString(),
-                                                    work.getId()
-                                            )
-                                    );
                                     myRunningCount.getAndDecrement();
                                 })
-                        .build()
+                        .andThen(work.onError())
+                        .finish()
         );
     }
 

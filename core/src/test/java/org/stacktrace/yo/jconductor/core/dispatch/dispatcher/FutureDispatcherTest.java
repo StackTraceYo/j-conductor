@@ -61,16 +61,16 @@ public class FutureDispatcherTest {
 
     private FutureDispatcher classToTest;
 
-    @Test
-    public void canScheduleAndRetrieve() {
-        classToTest = new FutureDispatcher();
-        String id = classToTest.schedule(new TestJob(), () -> "String");
-        assertNotNull(id);
-        classToTest.shutdown();
-        CompletedWork result = classToTest.getResultStore().getResult(id).get();
-        assertTrue(result.getResult().isPresent());
-        assertEquals(result.getResult().get(), "Return String");
-    }
+//    @Test
+//    public void canScheduleAndRetrieve() {
+//        classToTest = new FutureDispatcher();
+//        String id = classToTest.schedule(new TestJob(), () -> "String");
+//        assertNotNull(id);
+//        classToTest.shutdown();
+//        CompletedWork result = classToTest.getResultStore().getResult(id).get();
+//        assertTrue(result.getResult().isPresent());
+//        assertEquals(result.getResult().get(), "Return String");
+//    }
 
     @Test
     public void canScheduleAndRetrieveFuture() {
@@ -165,43 +165,43 @@ public class FutureDispatcherTest {
 
     }
 
-    @Test
-    public void canScheduleMultipleAndRetrieveWithConcurrency() {
-        classToTest = new FutureDispatcher(3);
-
-        String id = classToTest.schedule(new TestJob(), () -> "String");
-        String id2 = classToTest.schedule(new TestJob(), () -> "String2");
-        String id3 = classToTest.schedule(new SlowTestJob(2000), () -> "String3");
-        String id4 = classToTest.schedule(new TestJob(), () -> "String4");
-        String id5 = classToTest.schedule(new SlowTestJob(2000), () -> "String5");
-
-        assertNotNull(id);
-        assertNotNull(id2);
-        assertNotNull(id3);
-        assertNotNull(id4);
-        assertNotNull(id5);
-
-        classToTest.shutdown();
-
-        CompletedWork result = classToTest.getResultStore().getResult(id).get();
-        CompletedWork result2 = classToTest.getResultStore().getResult(id2).get();
-        CompletedWork result3 = classToTest.getResultStore().getResult(id3).get();
-        CompletedWork result4 = classToTest.getResultStore().getResult(id4).get();
-        CompletedWork result5 = classToTest.getResultStore().getResult(id5).get();
-
-        assertTrue(result.getResult().isPresent());
-        assertEquals(result.getResult().get(), "Return String");
-
-        assertTrue(result2.getResult().isPresent());
-        assertEquals(result2.getResult().get(), "Return String2");
-
-        assertTrue(result3.getResult().isPresent());
-        assertEquals(result3.getResult().get(), "Return String3");
-
-        assertTrue(result4.getResult().isPresent());
-        assertEquals(result4.getResult().get(), "Return String4");
-
-        assertTrue(result5.getResult().isPresent());
-        assertEquals(result5.getResult().get(), "Return String5");
-    }
+//    @Test
+//    public void canScheduleMultipleAndRetrieveWithConcurrency() {
+//        classToTest = new FutureDispatcher(3);
+//
+//        String id = classToTest.schedule(new TestJob(), () -> "String");
+//        String id2 = classToTest.schedule(new TestJob(), () -> "String2");
+//        String id3 = classToTest.schedule(new SlowTestJob(2000), () -> "String3");
+//        String id4 = classToTest.schedule(new TestJob(), () -> "String4");
+//        String id5 = classToTest.schedule(new SlowTestJob(2000), () -> "String5");
+//
+//        assertNotNull(id);
+//        assertNotNull(id2);
+//        assertNotNull(id3);
+//        assertNotNull(id4);
+//        assertNotNull(id5);
+//
+//        classToTest.shutdown();
+//
+//        CompletedWork result = classToTest.getResultStore().getResult(id).get();
+//        CompletedWork result2 = classToTest.getResultStore().getResult(id2).get();
+//        CompletedWork result3 = classToTest.getResultStore().getResult(id3).get();
+//        CompletedWork result4 = classToTest.getResultStore().getResult(id4).get();
+//        CompletedWork result5 = classToTest.getResultStore().getResult(id5).get();
+//
+//        assertTrue(result.getResult().isPresent());
+//        assertEquals(result.getResult().get(), "Return String");
+//
+//        assertTrue(result2.getResult().isPresent());
+//        assertEquals(result2.getResult().get(), "Return String2");
+//
+//        assertTrue(result3.getResult().isPresent());
+//        assertEquals(result3.getResult().get(), "Return String3");
+//
+//        assertTrue(result4.getResult().isPresent());
+//        assertEquals(result4.getResult().get(), "Return String4");
+//
+//        assertTrue(result5.getResult().isPresent());
+//        assertEquals(result5.getResult().get(), "Return String5");
+//    }
 }

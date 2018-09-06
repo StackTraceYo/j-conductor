@@ -2,10 +2,8 @@ package org.stacktrace.yo.jconductor.core.dispatch.dispatcher;
 
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListener;
 import org.stacktrace.yo.jconductor.core.execution.work.Job;
-import org.stacktrace.yo.jconductor.core.execution.work.MultiJob;
 import org.stacktrace.yo.jconductor.core.util.supplier.MultiSupplier;
 
-import java.util.Collection;
 import java.util.function.Supplier;
 
 public interface Dispatcher {

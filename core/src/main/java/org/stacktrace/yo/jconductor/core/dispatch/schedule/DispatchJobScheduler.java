@@ -86,11 +86,12 @@ public class DispatchJobScheduler {
                     myScheduledJobs.remove(jobId);
                     myJobPlans.remove(jobId);
                 })
+                .next()
                 .onError(error -> {
                     String jobId = plan.getExecutionId();
                     myScheduledJobs.remove(jobId);
                     myJobPlans.remove(jobId);
                 })
-                .build();
+                .finish();
     }
 }

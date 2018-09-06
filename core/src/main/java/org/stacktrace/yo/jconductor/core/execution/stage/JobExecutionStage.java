@@ -1,5 +1,7 @@
 package org.stacktrace.yo.jconductor.core.execution.stage;
 
+import org.stacktrace.yo.jconductor.core.dispatch.work.CompletedWork;
+
 public enum JobExecutionStage {
     STAGED,
     INITIALZING,
@@ -14,4 +16,5 @@ public enum JobExecutionStage {
     public <T> JobStage<T> createStage(String id) {
         return new JobStage<>(this, id);
     }
+
 }

@@ -17,11 +17,11 @@ public class ObservableJob<T, V> extends Worker<T, V> implements Executable<Obse
 
 
     public ObservableJob(String id, Job<T, V> job, T params) {
-        super(id, job, params);
+        super(id, job, () -> params);
     }
 
     public ObservableJob(String id, Work<T, V> work, T params) {
-        super(id, work, params);
+        super(id, work::doWork, () -> params);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class ObservableJob<T, V> extends Worker<T, V> implements Executable<Obse
     private Observable<JobStage> createAsyncObservable() {
         return Observable.create(subscriber -> {
             subscriber.onNext(JobExecutionStage.INITIALZING.createStage(this.id));
-            this.job.init(this.params);
+            this.job.init(this.params.get());
             subscriber.onNext(JobExecutionStage.RUNNING.createStage(this.id));
             System.out.println(Thread.currentThread().getName());
             this.supplyFuture()
@@ -48,7 +48,7 @@ public class ObservableJob<T, V> extends Worker<T, V> implements Executable<Obse
     private Observable<JobStage> createAsyncObservable(Executor e) {
         return Observable.create(subscriber -> {
             subscriber.onNext(JobExecutionStage.INITIALZING.createStage(this.id));
-            this.job.init(this.params);
+            this.job.init(this.params.get());
             subscriber.onNext(JobExecutionStage.RUNNING.createStage(this.id));
             System.out.println(Thread.currentThread().getName());
             this.supplyFuture(e)
@@ -71,11 +71,11 @@ public class ObservableJob<T, V> extends Worker<T, V> implements Executable<Obse
     }
 
     private CompletableFuture<V> supplyFuture() {
-        return CompletableFuture.supplyAsync(() -> this.job.doWork(this.params));
+        return CompletableFuture.supplyAsync(() -> this.job.doWork(this.params.get()));
     }
 
     private CompletableFuture<V> supplyFuture(Executor e) {
-        return CompletableFuture.supplyAsync(() -> this.job.doWork(this.params), e);
+        return CompletableFuture.supplyAsync(() -> this.job.doWork(this.params.get()), e);
     }
 
     public static void main(String args[]) throws InterruptedException {

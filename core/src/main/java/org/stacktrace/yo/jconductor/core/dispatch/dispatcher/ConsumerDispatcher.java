@@ -3,10 +3,6 @@ package org.stacktrace.yo.jconductor.core.dispatch.dispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.stacktrace.yo.jconductor.core.dispatch.schedule.SchedulingDispatcher;
-import org.stacktrace.yo.jconductor.core.dispatch.store.InMemoryResultStore;
-import org.stacktrace.yo.jconductor.core.dispatch.store.ResultStore;
-import org.stacktrace.yo.jconductor.core.dispatch.store.ResultStoringDispatcher;
-import org.stacktrace.yo.jconductor.core.dispatch.work.CompletedWork;
 import org.stacktrace.yo.jconductor.core.dispatch.work.ScheduledWork;
 import org.stacktrace.yo.jconductor.core.execution.job.DefaultWorker;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListener;
@@ -15,7 +11,6 @@ import org.stacktrace.yo.jconductor.core.execution.work.Job;
 import org.stacktrace.yo.jconductor.core.util.collections.EmittingQueue;
 import org.stacktrace.yo.jconductor.core.util.supplier.MultiSupplier;
 
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -24,12 +19,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
-public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDispatcher {
+public class ConsumerDispatcher implements SchedulingDispatcher {
 
     private static final Logger myLogger = LoggerFactory.getLogger(ConsumerDispatcher.class.getSimpleName());
 
     private final EmittingQueue<ScheduledWork> jobQueue;
-    private final ResultStore myResultStore;
     private final ScheduledExecutorService executorService;
     private final ScheduledExecutorService schedulerService;
     private final AtomicInteger pending;
@@ -38,7 +32,6 @@ public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDi
 
     public ConsumerDispatcher() {
         this.jobQueue = createQueue();
-        this.myResultStore = new InMemoryResultStore();
         this.pending = new AtomicInteger(0);
         this.running = new AtomicInteger(0);
         // two threads, 1 consumer and 1 reporter
@@ -51,7 +44,6 @@ public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDi
 
     public ConsumerDispatcher(int consumers) {
         this.jobQueue = createQueue();
-        this.myResultStore = new InMemoryResultStore();
         this.pending = new AtomicInteger(0);
         this.running = new AtomicInteger(0);
         // 1 thread per consumer
@@ -129,11 +121,6 @@ public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDi
         };
     }
 
-    @Override
-    public Optional<CompletedWork> fetch(String id) {
-        return myResultStore.getResult(id);
-    }
-
     public boolean shutdown() {
         myLogger.debug("[ConsumerDispatcher] Shutting Down");
         if (this.isRunning()) {
@@ -158,46 +145,29 @@ public class ConsumerDispatcher implements SchedulingDispatcher, ResultStoringDi
         return schedulerService;
     }
 
-    @Override
-    public ResultStore getResultStore() {
-        return myResultStore;
-    }
-
     @SuppressWarnings("unchecked")
     private <T, V> DefaultWorker createJob(ScheduledWork<T, V> work) {
         return new DefaultWorker(work.getId(), work.getJob(), work.getParams(),
                 new StageListenerBuilder<V>()
-                        .bindListener(work.getListener())
                         .onStart(running -> {
                             myLogger.debug("[ConsumerDispatcher] Job Started: {}", work.getId());
                         })
+                        .andThen(work.onStart())
+                        .next()
                         .onComplete(
                                 completed -> {
                                     myLogger.debug("[ConsumerDispatcher] Job Completed: {}", work.getId());
-                                    myResultStore.putResult(work.getId(),
-                                            new CompletedWork(
-                                                    completed.getStageResult(),
-                                                    work.getParams(),
-                                                    work.getJob().getClass().toGenericString(),
-                                                    completed.getId()
-                                            )
-                                    );
                                     this.running.getAndDecrement();
                                 })
+                        .andThen(work.onComplete())
+                        .next()
                         .onError(
                                 error -> {
                                     myLogger.error("[ConsumerDispatcher] Job Errored: {}", work.getId(), error);
-                                    myResultStore.putResult(work.getId(),
-                                            new CompletedWork(
-                                                    error,
-                                                    work.getParams(),
-                                                    work.getJob().getClass().toGenericString(),
-                                                    work.getId()
-                                            )
-                                    );
                                     this.running.getAndDecrement();
                                 })
-                        .build()
+                        .andThen(work.onError())
+                        .finish()
         );
     }
 

@@ -1,30 +1,29 @@
 package org.stacktrace.yo.jconductor.core.execution.job;
 
+import org.stacktrace.yo.jconductor.core.execution.stage.CompletedJobStage;
+import org.stacktrace.yo.jconductor.core.execution.stage.JobStage;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListener;
 import org.stacktrace.yo.jconductor.core.execution.work.Job;
-import org.stacktrace.yo.jconductor.core.execution.work.Work;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class FutureWorker<T, V> extends Worker<T, V> implements Executable<CompletableFuture<V>> {
+
 
     public FutureWorker(String id, Job<T, V> job, Supplier<T> params) {
         super(id, job, params);
     }
 
+    public FutureWorker(String id, Job<T, V> job, Supplier<T> params, Consumer<JobStage<V>> onStart, Consumer<CompletedJobStage<V>> onComplete, Consumer<Throwable> onError) {
+        super(id, job, params, onStart, onComplete, onError);
+    }
+
     public FutureWorker(String id, Job<T, V> job, Supplier<T> params, StageListener<V> listener) {
         super(id, job, params, listener);
-    }
-
-    public FutureWorker(String id, Work<T, V> work, Supplier<T> params) {
-        super(id, work, params);
-    }
-
-    public FutureWorker(String id, Work<T, V> work, Supplier<T> params, StageListener<V> listener) {
-        super(id, work, params, listener);
     }
 
     public CompletableFuture<V> run() {

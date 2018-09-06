@@ -1,10 +1,11 @@
 package org.stacktrace.yo.jconductor.core.execution.job;
 
+import org.stacktrace.yo.jconductor.core.dispatch.work.CompletedWork;
+import org.stacktrace.yo.jconductor.core.execution.stage.CompletedJobStage;
 import org.stacktrace.yo.jconductor.core.execution.stage.JobExecutionStage;
 import org.stacktrace.yo.jconductor.core.execution.stage.JobStage;
 import org.stacktrace.yo.jconductor.core.execution.stage.StageListener;
 import org.stacktrace.yo.jconductor.core.execution.work.Job;
-import org.stacktrace.yo.jconductor.core.execution.work.Work;
 import org.stacktrace.yo.jconductor.core.util.supplier.LazyLoading;
 
 import java.util.function.Consumer;
@@ -23,16 +24,8 @@ public abstract class Worker<T, V> {
         this(id, job, params, new StageListener.NoOpListener<>());
     }
 
-    public Worker(String id, Job<T, V> job, Supplier<T> params, Consumer<JobStage<V>> onStart, Consumer<JobStage<V>> onComplete, Consumer<Throwable> onError) {
+    public Worker(String id, Job<T, V> job, Supplier<T> params, Consumer<JobStage<V>> onStart, Consumer<CompletedJobStage<V>> onComplete, Consumer<Throwable> onError) {
         this(id, job, params, new StageListener.DefaultStageListener<>(onStart, onComplete, onError));
-    }
-
-    public Worker(String id, Work<T, V> work, Supplier<T> params) {
-        this(id, new BasicJob<>(work), params);
-    }
-
-    public Worker(String id, Work<T, V> work, Supplier<T> params, StageListener<V> listener) {
-        this(id, new BasicJob<>(work), params, listener);
     }
 
     public Worker(String id, Job<T, V> job, Supplier<T> params, StageListener<V> listener) {
@@ -49,7 +42,19 @@ public abstract class Worker<T, V> {
 
     protected final void consumeComplete() {
         this.status = JobExecutionStage.COMPLETE;
-        this.listener.onComplete().accept(this.status.createStage(this.id, this.result));
+
+        this.listener.onComplete().accept(
+                new CompletedJobStage<>(
+                        this.status,
+                        this.id,
+                        new CompletedWork<>(
+                                result,
+                                params.get(),
+                                job.getClass().toGenericString(),
+                                id
+                        )
+                )
+        );
     }
 
     protected final void consumeError(Throwable e) {

@@ -4,53 +4,104 @@ import java.util.function.Consumer;
 
 public final class StageListenerBuilder<V> {
 
-    private Consumer<JobStage<V>> onStart;
-    private Consumer<JobStage<V>> onComplete;
-    private Consumer<Throwable> onError;
+    private Consumer<JobStage<V>> myStartConsumer;
+    private Consumer<CompletedJobStage<V>> myCompleteConsumer;
+    private Consumer<Throwable> myErrorConsumer;
 
-    public StageListenerBuilder<V> onStart(Consumer<JobStage<V>> onStart) {
-        if (this.onStart != null && onStart != null) {
-            this.onStart = this.onStart.andThen(onStart);
-        } else if (onStart != null) {
-            this.onStart = onStart;
-        }
-        return this;
+    public Starter<V> onStart(Consumer<JobStage<V>> onStart) {
+        return new Starter<V>(this, onStart);
     }
 
-    public StageListenerBuilder<V> onComplete(Consumer<JobStage<V>> onComplete) {
-        if (this.onComplete != null && onComplete != null) {
-            this.onComplete = this.onComplete.andThen(onComplete);
-        } else if (onComplete != null) {
-            this.onComplete = onComplete;
-        }
-        return this;
+    public Completer<V> onComplete(Consumer<CompletedJobStage<V>> onComplete) {
+        return new Completer<V>(this, onComplete);
     }
 
-    public StageListenerBuilder<V> onError(Consumer<Throwable> onError) {
-        if (this.onError != null && onError != null) {
-            this.onError = this.onError.andThen(onError);
-        } else if (onError != null) {
-            this.onError = onError;
-        }
-        return this;
-    }
-
-    public StageListenerBuilder<V> bindListener(StageListener<V> listener) {
-        if (listener != null) {
-            onStart(listener.onStart());
-            onComplete(listener.onComplete());
-            onError(listener.onError());
-        }
-        return this;
+    public Errorer<V> onError(Consumer<Throwable> onError) {
+        return new Errorer<V>(this, onError);
     }
 
     public StageListener<V> build() {
-        return new StageListener.DefaultStageListener<>(defaultNull(onStart), defaultNull(onComplete), defaultNull(onError));
+        return new StageListener.DefaultStageListener<>(defaultNull(myStartConsumer), defaultNull(myCompleteConsumer), defaultNull(myErrorConsumer));
     }
 
     private static <V> Consumer<V> defaultNull(Consumer<V> consumer) {
         return consumer == null ? v -> {
         } : consumer;
+    }
+
+    public static class Completer<V> {
+
+        private Consumer<CompletedJobStage<V>> onComplete;
+        private StageListenerBuilder<V> builder;
+
+        private Completer(StageListenerBuilder<V> builder, Consumer<CompletedJobStage<V>> onComplete) {
+            this.builder = builder;
+            this.onComplete = onComplete;
+        }
+
+        public Completer<V> andThen(Consumer<CompletedJobStage<V>> onComplete) {
+            this.onComplete = this.onComplete.andThen(onComplete);
+            return this;
+        }
+
+        public StageListenerBuilder<V> next() {
+            builder.myCompleteConsumer = this.onComplete;
+            return builder;
+        }
+
+        public StageListener<V> finish() {
+            return next().build();
+        }
+    }
+
+    public static class Starter<V> {
+
+        private Consumer<JobStage<V>> onStart;
+        private StageListenerBuilder<V> builder;
+
+        private Starter(StageListenerBuilder<V> builder, Consumer<JobStage<V>> onStart) {
+            this.builder = builder;
+            this.onStart = onStart;
+        }
+
+        public Starter<V> andThen(Consumer<JobStage<V>> onStart) {
+            this.onStart = this.onStart.andThen(onStart);
+            return this;
+        }
+
+        public StageListenerBuilder<V> next() {
+            builder.myStartConsumer = this.onStart;
+            return builder;
+        }
+
+        public StageListener<V> finish() {
+            return next().build();
+        }
+    }
+
+    public static class Errorer<V> {
+
+        private Consumer<Throwable> onError;
+        private StageListenerBuilder<V> builder;
+
+        private Errorer(StageListenerBuilder<V> builder, Consumer<Throwable> onError) {
+            this.builder = builder;
+            this.onError = onError;
+        }
+
+        public Errorer<V> andThen(Consumer<Throwable> onError) {
+            this.onError = this.onError.andThen(onError);
+            return this;
+        }
+
+        public StageListenerBuilder<V> next() {
+            builder.myErrorConsumer = this.onError;
+            return builder;
+        }
+
+        public StageListener<V> finish() {
+            return next().build();
+        }
     }
 
 }

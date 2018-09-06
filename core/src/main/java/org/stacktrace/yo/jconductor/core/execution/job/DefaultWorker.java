@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 public class DefaultWorker<T, V> extends Worker<T, V> implements Executable<V> {
 
     public DefaultWorker(String id, Work<T, V> work, Supplier<T> params) {
-        super(id, work, params);
+        super(id, work::doWork, params);
     }
 
     public DefaultWorker(String id, Job<T, V> job, Supplier<T> params) {
@@ -19,10 +19,6 @@ public class DefaultWorker<T, V> extends Worker<T, V> implements Executable<V> {
 
     public DefaultWorker(String id, Job<T, V> job, Supplier<T> params, StageListener<V> listener) {
         super(id, job, params, listener);
-    }
-
-    public DefaultWorker(String id, Work<T, V> work, Supplier<T> params, StageListener<V> listener) {
-        super(id, work, params, listener);
     }
 
     public V run() {
