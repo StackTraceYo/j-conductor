@@ -5,6 +5,9 @@ import java.util.function.Supplier;
 public class LazyLoading<Value> implements Supplier<Value> {
 
     public static <Value> LazyLoading<Value> lazy(Supplier<Value> supplier) {
+        if(supplier instanceof LazyLoading ){
+            return (LazyLoading<Value>) supplier;
+        }
         return new LazyLoading<>(supplier);
     }
 

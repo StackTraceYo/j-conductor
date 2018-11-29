@@ -58,6 +58,14 @@ public class ConsumerDispatcher implements SchedulingDispatcher {
                 });
     }
 
+    @Override
+    public <T, V> String schedule(Job<T, V> job, StageListener<V> listener) {
+        String id = UUID.randomUUID().toString();
+        ScheduledWork<T, V> scheduledWork = new ScheduledWork<>(job, id);
+        myLogger.debug("[ConsumerDispatcher] scheduling new job {}", id);
+        return jobQueue.offer(scheduledWork) ? id : "Unable To Queue";
+    }
+
     public <T, V> String schedule(Job<T, V> job, Supplier<T> params) {
         String id = UUID.randomUUID().toString();
         ScheduledWork<T, V> scheduledWork = new ScheduledWork<>(job, params, id);

@@ -22,9 +22,9 @@ public class DefaultWorker<T, V> extends Worker<T, V> implements Executable<V> {
     }
 
     public V run() {
-        job.init(params.get());
-        consumeStart();
         try {
+            job.init(params.get());
+            consumeStart();
             result = job.doWork(params.get());
             consumeComplete();
             job.postRun();

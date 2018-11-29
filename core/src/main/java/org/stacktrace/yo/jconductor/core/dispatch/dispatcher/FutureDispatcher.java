@@ -38,6 +38,21 @@ public class FutureDispatcher implements AsyncDispatcher {
         this(1);
     }
 
+    @Override
+    public <T, V> CompletableFuture<V> scheduleAsync(Job<T, V> job, StageListener<V> listener) {
+        String id = UUID.randomUUID().toString();
+        ScheduledWork<T, V> scheduledWork = new ScheduledWork<>(job, id);
+        return run(schedule(scheduledWork, id));
+    }
+
+    @Override
+    public <T, V> String schedule(Job<T, V> job, StageListener<V> listener) {
+        String id = UUID.randomUUID().toString();
+        ScheduledWork<T, V> scheduledWork = new ScheduledWork<>(job, id);
+        run(schedule(scheduledWork, id));
+        return id;
+    }
+
     public <T, V> String schedule(Job<T, V> job, Supplier<T> params) {
         String id = UUID.randomUUID().toString();
         ScheduledWork<T, V> scheduledWork = new ScheduledWork<>(job, params, id);
