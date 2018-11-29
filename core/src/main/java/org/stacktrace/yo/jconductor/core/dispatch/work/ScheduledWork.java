@@ -24,6 +24,13 @@ public class ScheduledWork<T, V> {
         this.stageListener = new StageListener.NoOpListener<>();
     }
 
+    public ScheduledWork(Job<T, V> job, String id) {
+        this.job = job;
+        this.params = LazyLoading.lazy(() -> null);
+        this.id = id;
+        this.stageListener = new StageListener.NoOpListener<>();
+    }
+
     public ScheduledWork(Job<T, V> job, Supplier<T> params, String id, Consumer<CompletedJobStage<V>> onComplete) {
         this(job, params, id);
         this.stageListener = new StageListenerBuilder<V>().onComplete(onComplete).finish();

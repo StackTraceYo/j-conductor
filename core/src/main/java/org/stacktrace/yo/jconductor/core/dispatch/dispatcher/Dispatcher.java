@@ -8,6 +8,8 @@ import java.util.function.Supplier;
 
 public interface Dispatcher {
 
+    <T, V> String schedule(Job<T, V> job, StageListener<V> listener);
+
     <T, V> String schedule(Job<T, V> job, Supplier<T> params);
 
     <T, V> String schedule(Job<T, V> job, Supplier<T> params, StageListener<V> listener);
