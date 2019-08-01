@@ -198,4 +198,9 @@ public class ConsumerDispatcher implements SchedulingDispatcher {
     public boolean isActive() {
         return !this.executorService.isShutdown() && !this.schedulerService.isShutdown();
     }
+
+    @Override
+    public int queued() {
+        return this.running.get();
+    }
 }

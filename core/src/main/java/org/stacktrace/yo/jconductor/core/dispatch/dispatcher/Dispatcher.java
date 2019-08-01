@@ -19,4 +19,6 @@ public interface Dispatcher {
     <T, V> String schedule(Job<T, V> job, MultiSupplier<T> params, StageListener<V> listener);
 
     boolean shutdown();
+
+    int queued();
 }

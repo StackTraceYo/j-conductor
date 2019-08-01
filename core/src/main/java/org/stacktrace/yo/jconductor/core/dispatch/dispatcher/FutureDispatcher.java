@@ -164,4 +164,9 @@ public class FutureDispatcher implements AsyncDispatcher {
     public boolean isActive() {
         return !myExecutorService.isShutdown();
     }
+
+    @Override
+    public int queued() {
+        return this.myRunningCount.get();
+    }
 }
